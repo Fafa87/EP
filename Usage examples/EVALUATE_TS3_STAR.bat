@@ -1,0 +1,1 @@
+evaluate.py TestSet3 "GroundTruth" "seg" "track" CellStar "CellStar" "cs_seg" "cs_track" 
