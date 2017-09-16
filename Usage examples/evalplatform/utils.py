@@ -127,7 +127,7 @@ def read_from_file(path):
     data_set: [(f,val)] -> 1 2\n2 5\n3 8
     data_sets: [data_set] -> data1\n\n\ndata2
     """
-    opened_file = open(path,"r")
+    opened_file = open(path,"rU")
     joined = opened_file.read()
     opened_file.close()
     
@@ -220,7 +220,7 @@ class TestINI(unittest.TestCase):
 
 class TestReadWritePlot(unittest.TestCase):
     def readfile(self,path):
-        opened_file = open(path,"r")
+        opened_file = open(path,"rU")
         lines = opened_file.readlines()
         opened_file.close()
         return lines

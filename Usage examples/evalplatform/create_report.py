@@ -6,7 +6,7 @@ measure_type = "F:"
 
 def create_report(summary_file_path,precision,format,output_file):
     global measure_type
-    summary_file = open(summary_file_path,"r")
+    summary_file = open(summary_file_path,"rU")
     data = summary_file.readlines()
 
     all_algo_results = []

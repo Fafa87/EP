@@ -40,12 +40,12 @@ def determine_all_snaptimes(file_names):
 
 def merge_seg_track_files(folder,files):
     """Merge two files into one, add tmp suffix if not already there."""
-    file_one = open(os.path.join(folder,files[0]),"r")
+    file_one = open(os.path.join(folder,files[0]),"rU")
     seg_all = file_one.readlines()
     seg_header,seg = seg_all[0],seg_all[1:]
     file_one.close()
     
-    file_two = open(os.path.join(folder,files[1]),"r")
+    file_two = open(os.path.join(folder,files[1]),"rU")
     tracking_all = file_two.readlines()
     tracking_header,tracking = tracking_all[0],tracking_all[1:]
     file_two.close()
@@ -74,7 +74,7 @@ def merge_seg_track_files(folder,files):
 def merge_files_into_one(times, folder, files):
     """Merge many files into one, add tmp suffix if not already there."""
     def add_file(write_file,new_file_path,time):
-        new_file = open(new_file_path,"r")
+        new_file = open(new_file_path,"rU")
         data = new_file.readlines()[1:]
         new_file.close()
         
@@ -88,7 +88,7 @@ def merge_files_into_one(times, folder, files):
         output_name += TMP_SUFFIX
     
     # Read header
-    first_file = open(os.path.join(folder,files[0]),"r")
+    first_file = open(os.path.join(folder,files[0]),"rU")
     header = first_file.readlines()[0]
     first_file.close()
     

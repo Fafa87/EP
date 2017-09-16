@@ -82,7 +82,7 @@ def join6(path):
 imageglue_functions = {2 : join2, 4 : join4, 6 : join6}    
 
 def read_algorithm_name(summary_path):
-    summary_file = open(summary_path,"r")
+    summary_file = open(summary_path,"rU")
     linia = summary_file.readlines()[0]
     summary_file.close()
     return linia[len("Algorithm: "):].strip()
@@ -164,7 +164,7 @@ def create_additional_plots(title, (name_data_paths), set_number, output_name):
 def merge_txt(file_paths, output):
     results = []
     for file in file_paths:
-        file=open(file,"r")
+        file=open(file,"rU")
         results.append(file.readlines())
         file.close()
     merged_results = "\n\n".join(["".join(res) for res in results])
