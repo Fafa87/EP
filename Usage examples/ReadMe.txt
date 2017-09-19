@@ -5,9 +5,16 @@ version 1.0.1
 - Python version 2.7!
 - PIL (python library)
 - Gnuplot (should be available from command line)
-- Tested only on Windows XP and Mac OS X 10.7.5
+- Tested only on Windows XP and Mac OS X 10.7.5 and Ubuntu
 
-1b. Additional naming requirements
+1b. Requirements instal on Ubuntu (on clean machine)
+sudo apt-get install python-pip
+sudo pip install matplotlib
+sudo apt-get install python-tk
+sudo apt-get install gnuplot
+sudo pip install Pillow
+
+1c. Additional naming requirements
 - no results data file can contain ".eval." or ".tmp" in its name
 - per-frame results files should end with frame number
 - only one results evaluation per folder

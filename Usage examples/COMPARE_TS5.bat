@@ -1,1 +1,1 @@
-compare.py TestSet5 CellStar Tracker
+python compare.py TestSet5 CellStar Tracker
