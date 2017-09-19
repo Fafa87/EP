@@ -48,6 +48,10 @@ def read_ground_truth(path):
     debug_center.show_in_console(None,"Progress","Done reading ground truth data...")
     return cells
 
+def make_all_cells_important(frame_cells):
+    for frame_cell in frame_cells:
+        frame_cell[1].colour = 0
+    
 def read_results(path, parser, name):
     """
     Returns::
@@ -58,6 +62,7 @@ def read_results(path, parser, name):
     data_file = open(path,"rU")
     lines = data_file.readlines()
     cells = parser.parse(lines)
+    make_all_cells_important(cells) # cells cannot use colour temporary
     data_file.close()
     debug_center.show_in_console(None,"Progress","".join(["Done reading ", name, " result data..."]))
     return (name,cells)

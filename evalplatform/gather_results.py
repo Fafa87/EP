@@ -44,7 +44,7 @@ def join4(path):
     merged.paste(imA, (border,border))
     merged.paste(imB, (border+half_size[0],border))
     merged.paste(imC, (border,border+half_size[1]))
-    merged.paste(imB, (border+half_size[0],border+half_size[1]))
+    merged.paste(imD, (border+half_size[0],border+half_size[1]))
 
     merged.save(os.path.join(path,"Glued.png"))
 

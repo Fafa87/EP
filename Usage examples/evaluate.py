@@ -156,7 +156,7 @@ if __name__ == '__main__':
     
     # Validate multifile
     if(many_files_gt ^ many_files_algo):
-        debug_center.show_in_console(None,"Warning", "WARNING: Either both algorith results and ground truth should use many files or none of them. Make sure that frames are correctly matched (GT-Results).")
+        debug_center.show_in_console(None,"Warning", "WARNING: Either both algorithm results and ground truth should use many files or none of them. Make sure that frames are correctly matched (GT-Results).")
         #sys.exit(1) we can live without it
 
     gt_files = []

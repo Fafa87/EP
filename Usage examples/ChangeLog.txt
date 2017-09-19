@@ -1,0 +1,19 @@
+EVALUATION TOOL FOR CELL SEGMENTATION AND TRACKING
+CHANGE LOG:
+
+Up to 1.01:
+- universal endline handling
+- minor bugs
+
+Up to 1.00:
+- errors tracking (in csv and png)
+- long term tracking
+- should work with both ; and ,
+- major refactor
+- bug fixes
+- minor bug fixes
+- summary to std
+- report.csv of F values
+- segmentation and tracking evaluation details go to file
+- visualisation of the evaluation on input images (segmentation, tracking, long tracking)
+- long-term tracking evaluation

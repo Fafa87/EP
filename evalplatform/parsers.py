@@ -193,10 +193,11 @@ class DefaultPlatformParser(CSVCellParser):
                 else:
                     self.map_name = self.map_colour_name_segonly
             else:
-                if "Unique_cell_number" in headers:
+                if "Unique_cell_number" in headers or len(header_list) == len(self.map_regular_name_segrack):
                     self.map_name = self.map_regular_name_segrack
                 else:
                     self.map_name = self.map_regular_name_segonly
+            print "Used mapping: ", self.map_name
         else:
             self.map_name = dict([(self.header_to_csvcellparser[h.strip()],i) for i,h in enumerate(header_list)])
         
