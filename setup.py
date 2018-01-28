@@ -1,5 +1,25 @@
 import setuptools
 
+
+class Test(setuptools.Command):
+    user_options = [
+        ("pytest-args=", "a", "arguments to pass to py.test")
+    ]
+
+    def initialize_options(self):
+        self.pytest_args = []
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        import pytest
+        import sys
+
+        errno = pytest.main(self.pytest_args + ' --ignore=utils/')
+
+        sys.exit(errno)
+        
 setuptools.setup(
         author="Filip Mroz",
         author_email="fafafft@gmail.com",
@@ -11,6 +31,9 @@ setuptools.setup(
             "Programming Language :: Python :: 2.7",
             "Topic :: Scientific/Engineering"
         ],
+        cmdclass={
+            "test": Test
+        },
         include_package_data=True,
         install_requires=[
             "matplotlib>=1.4.0",
