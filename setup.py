@@ -15,9 +15,7 @@ class Test(setuptools.Command):
     def run(self):
         import pytest
         import sys
-
-        errno = pytest.main(self.pytest_args + ' --ignore=utils/')
-
+        errno = pytest.main(self.pytest_args)
         sys.exit(errno)
         
 setuptools.setup(
@@ -35,10 +33,6 @@ setuptools.setup(
             "test": Test
         },
         include_package_data=True,
-        install_requires=[
-            "matplotlib>=1.4.0",
-            "Pillow>=2.5.3"
-        ],
         keywords=["evaluation","precision","recall"],
         license="BSD",
         long_description="",
