@@ -5,7 +5,7 @@ import subprocess
 from PIL import Image
 
 from utils import*
-from create_report import create_report
+from create_report import create_report, create_sensible_report
 images_sufixes = [SEGPLOT_SUFFIX,TRACKPLOT_SUFFIX]
 SUMMARY_GNUPLOT_FILE = "plot_summary.plt"
 terminal_type = "png"
@@ -263,6 +263,7 @@ def run_script(args):
         
         # Produce additional report
         create_report(os.path.join(results_folder,"Summary.txt"),4,"csv",os.path.join(results_folder,"Report.csv"))
+        create_sensible_report(os.path.join(results_folder,"Summary.txt"),4,os.path.join(results_folder,"Sensible Report.csv"))
         debug_center.show_in_console(None,"Progress", "CSV summary created")
         
         # Merge images (using Image module)

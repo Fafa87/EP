@@ -3,10 +3,10 @@ import sys
 import os
 from itertools import *
 
-from utils import*
-from parsers import*
-from yeast_datatypes import CellOccurence
-import draw_details
+from .utils import*
+from .parsers import*
+from .yeast_datatypes import CellOccurence
+from . import draw_details
 
 SEGMENTATION_GNUPLOT_FILE = "plot_segmentation.plt"
 TRACKING_GNUPLOT_FILE = "plot_tracking.plt"

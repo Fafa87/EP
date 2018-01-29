@@ -4,9 +4,12 @@ import stat
 import shutil
 
 import csv
-import ConfigParser
+try:
+    import configparser as ConfigParser
+except:
+    import ConfigParser
 
-import debug
+from . import debug
 
 CONFIG_FILENAME = "evaluation.ini"
 

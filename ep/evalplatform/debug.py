@@ -37,7 +37,7 @@ class DebugCenter(object):
     
     def show_in_console(self, level, categories, text):
         if(self.check_if_enabled(level, categories)):
-            print text
+            print (text)
             return True
         return False
     

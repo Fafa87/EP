@@ -2,11 +2,12 @@ import sys
 import os
 import re
 
+import scipy.misc as misc
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-from utils import *
-from parsers import *
+from .utils import *
+from .parsers import *
 
 # ========= FRAMEWORK =========== #
 
@@ -57,7 +58,7 @@ class DrawingOverlordABC(object):
             Whether this file should be included in the input images set.
         """
         (_,extension) = os.path.splitext(filename)
-        return extension in [".tif",".jpg"]
+        return extension in [".tif",".jpg",".png"]
 
     def input_images(self, directory):
         directory = directory or "."
@@ -117,7 +118,7 @@ class EvaluationDetails(DrawingOverlordABC):
         else:
             return EvaluationType.WTF
         
-    def image_filter(self,filename): 
+    def image_filter(self,filename_with_ext):
         """
         Filter using part of the filename
         
@@ -127,10 +128,10 @@ class EvaluationDetails(DrawingOverlordABC):
         Return::
             Whether this file should be included in the input images set.
         """
-        (filename,extension) = os.path.splitext(filename)
-        if not self.required_substring is None and self.required_substring not in filename:
+        (filename,extension) = os.path.splitext(filename_with_ext)
+        if not self.required_substring is None and self.required_substring not in filename_with_ext:
             return False
-        return extension in [".tif",".jpg"]
+        return extension in [".tif",".jpg",".png"]
     
     def help_params(self):
         return "details_file, {input_files_substring}, {specific_details_file_type}, {draw_also_correct_results}"
@@ -198,19 +199,20 @@ get_path_new_file = lambda directory,filename: os.path.join(directory,"".join([o
 """Constructs new filename for modified drawing based on the current one."""
 
 # =============== SCRIPT USAGE PARAMETERS ================= #
-    
+
+def get_trailing_number(filepath):
+    filename = os.path.splitext(filepath)[0]
+    reversed_name = filename[::-1]
+    m = re.search("\D", reversed_name)
+    return int(reversed_name[:m.start()][::-1])
+
+
 def run(overlord, directory_images, directory_output, desired_output_file_prefix = None):
     global output_file_prefix
     
     data = overlord.read_data()
     output_file_prefix = desired_output_file_prefix or output_file_prefix
     # =========== READ INPUT IMAGES ============= #
-    def get_trailing_number(filepath):
-        filename = os.path.splitext(filepath)[0]
-        reversed_name = filename[::-1]
-        m = re.search("\D", reversed_name)
-        return int(reversed_name[:m.start()][::-1])
-    
     image_list = overlord.input_images(directory_images)
     image_number_dict = dict([(get_trailing_number(f), f) for f in image_list])
 
@@ -261,7 +263,7 @@ def run(overlord, directory_images, directory_output, desired_output_file_prefix
 
 if __name__== "__main__": 
     if len(sys.argv) == 1:
-        print "Parameters: input_images_directory, output_images_directory, output_file_prefix" + EvaluationDetails.help_params()
+        print ("Parameters: input_images_directory, output_images_directory, output_file_prefix" + EvaluationDetails.help_params())
         exit(0)
     
     directory_images = sys.argv[1]

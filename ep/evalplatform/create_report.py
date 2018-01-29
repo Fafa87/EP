@@ -47,6 +47,48 @@ def create_report(summary_file_path,precision,format,output_file):
             output.writelines(measure_line + ";".join([("{:." + str(precision) + "f}").format(a) for a in values]) + "\n")
         output.close()
 
+def create_sensible_report(summary_file_path,precision,output_file):
+    all_algo_results = []
+    algo_results = []
+
+    with open(summary_file_path,"r") as summary_file:
+        for line in summary_file:
+            line = line.strip()
+            if not line:
+                if algo_results:
+                    all_algo_results.append(algo_results)
+                    algo_results = []
+            else:
+                algo_results.append(line)
+
+    if algo_results:
+        all_algo_results.append(algo_results)
+
+    algo_dicts = list()
+    keys = set()
+    for d in all_algo_results:
+        algo_dict = dict()
+        stack = list()
+        for entry in d:
+            (name, value) = entry.split(":")
+            value = value.strip()
+            if not value: # just key
+                stack.append(name)
+            else:
+                if name == "F":
+                    name = stack.pop()
+                algo_dict[name] = value.strip()
+                keys.add(name)
+        algo_dicts.append(algo_dict)
+
+    keys.remove("Algorithm")
+    keys = ["Algorithm"] + sorted(keys)
+
+    with open(output_file, "w") as output:
+        output.write(",".join(keys) + "\n")
+        for algo in algo_dicts:
+            output.write(",".join([algo[k] for k in keys]) + "\n")
+
 if __name__ == '__main__':
     if len(sys.argv) - 1 < 5:
         print ("Script usage: <summary_file_path> <number_precision> csv <output_file_path> <measure_type>")

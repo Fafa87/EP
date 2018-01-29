@@ -56,7 +56,7 @@ class TrackingLink(object):
 
 def Enum(*sequential, **named):
     enums = dict(zip(sequential, range(len(sequential))), **named)
-    reverse = dict((value, key) for key, value in enums.iteritems())
+    reverse = dict((value, key) for key, value in enums.items())
     enums['reverse_mapping'] = reverse
     return type('Enum', (), enums)
 
@@ -80,11 +80,11 @@ class EvaluationDetail(object):
         return "{0} - {1}".format(self.frame,EvaluationResult.reverse_mapping[self.result])
     
     def calculate_result(self,GT,algo):
-        if GT != None and algo != None:
+        if GT is not None and algo is not None:
             result = EvaluationResult.CORRECT
-        elif GT != None:
+        elif GT is not None:
             result = EvaluationResult.FALSE_NEGATIVE
-        elif algo != None:
+        elif algo is not None:
             result = EvaluationResult.FALSE_POSITIVE
         else:
             result = EvaluationResult.UNKNOWN
