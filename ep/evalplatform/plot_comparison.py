@@ -19,6 +19,7 @@ input_type =  dict([(p.symbol,p) for p in parsers])
 ground_truth_parser = OldGroundTruthParser()
 
 # Max match distance. Read from: evaluation.ini at program folder then use this default.
+loaded_ini = False
 cutoff = 30 # pixels
 output_evaluation_details = 0
 draw_evaluation_details = 0
@@ -92,7 +93,8 @@ def write_to_file_printable(details, path):
     else:
         write_to_csv(["No details!"],[],path)
 
-def format_prF(title, (precision,recall,F)):
+def format_prF(title, params):
+    (precision, recall, F) = params
     return [title,"Precision: " + str(precision), "Recall: " + str(recall), "F: " + str(F)]
 
 def format_summary(algorithm, segmentation,tracking,long_tracking):
@@ -126,7 +128,7 @@ def find_correspondence(ground_truth, results):
     matchedGT = set([])
     matchedRes = set([])
 
-    for (d,(a,b)) in sorted(edges):
+    for (d,(a,b)) in sorted(edges, key=lambda x: x[0]):
         if not b in matchedRes:
             if not a in matchedGT:
                 correspondences.append((a,b))
@@ -171,19 +173,23 @@ def calculate_precision_recall_F_metrics(algorithm_number, real_number, correct_
         recall = correct_number/real_number
     return (precision, recall, 2*correct_number/(real_number+algorithm_number))   #precision*recall/(precision+recall))
 
-def calculate_metrics_segmentation((cell_count_results, cell_count_ground_truth, correspondences, false_positives, false_negatives)):
+def calculate_metrics_segmentation(params):
     """
     Input: (cell_count_results, cell_count_ground_truth, correspondences, false_positives, false_negatives)
     Result: (cell_count_results/cell_count_ground_truth, precision, recall, F)
     """
+    (cell_count_results, cell_count_ground_truth, correspondences, false_positives, false_negatives) = params
     prf = calculate_precision_recall_F_metrics(cell_count_results, cell_count_ground_truth, correspondences)
     return tuple([cell_count_results/cell_count_ground_truth]) + prf
 
-def calculate_stats_tracking((last_gt,last_res),last_mapping,(new_gt,new_res),new_mapping):
+def calculate_stats_tracking(params_last,last_mapping,params_new,new_mapping):
     """
     (found_links, real_links, correct_links, false_positive, false_negative)
     1 to 1 correspondence version
     """
+    (last_gt, last_res) = params_last
+    (new_gt, new_res) = params_new
+
     # ignore non obligatory GT cells
     last_gt = [c for c in last_gt if c.obligatory()]
     new_gt = [c for c in new_gt if c.obligatory()]
@@ -210,6 +216,18 @@ def calculate_stats_tracking((last_gt,last_res),last_mapping,(new_gt,new_res),ne
     false_positives = [TrackingResult(None,res) for res in found_links if correct_links == [] or res not in zip(*correct_links)[0]]
     
     return (found_links, real_links, correct_results, false_positives, false_negatives) # evaluation_details
+
+
+def load_general_ini(path):
+    global input_type, ground_truth_parser, cutoff, draw_evaluation_details, ignored_frame_size, loaded_ini
+    loaded_ini = True
+    if read_ini(CONFIG_FILE, 'evaluation', 'maxmatchdistance') != '':
+        cutoff = float(read_ini(CONFIG_FILE, 'evaluation', 'maxmatchdistance'))
+    if read_ini(CONFIG_FILE, 'evaluation', 'drawevaluationdetails') != '':
+        draw_evaluation_details = float(read_ini(CONFIG_FILE, 'evaluation', 'drawevaluationdetails'))
+    if read_ini(CONFIG_FILE, 'evaluation', 'ignoredframesize') != '':
+        ignored_frame_size = float(read_ini(CONFIG_FILE, 'evaluation', 'ignoredframesize'))
+
 
 def run_script(args):
     global input_type,ground_truth_parser,cutoff,draw_evaluation_details
