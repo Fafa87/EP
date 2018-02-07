@@ -48,7 +48,7 @@ class CSVCellParser():
         return True #all([h is not number for h in headers])
     
     def csv_line(self, data):
-        line = StringIO.StringIO()
+        line = StringIO()
         cw = csv.writer(line)
         cw.writerow(data)
         return line.getvalue().strip()

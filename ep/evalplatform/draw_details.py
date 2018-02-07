@@ -180,7 +180,8 @@ def SaveFigureAsImage(fileName,fig=None,**kwargs):
         w,h = kwargs['orig_size']
         w2,h2 = fig_size[0],fig_size[1]
         fig.set_size_inches([(w2/w)*w,(w2/w)*h])
-        fig.set_dpi((w2/w)*fig.get_dpi())
+        # on some environment it fails for some reason
+        # fig.set_dpi((w2/w)*fig.get_dpi())
     a=fig.gca()
     a.set_frame_on(False)
     a.set_xticks([]); a.set_yticks([])
