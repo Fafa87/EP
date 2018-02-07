@@ -41,11 +41,8 @@ def read_ground_truth(path):
     """
     debug_center.show_in_console(None,"Progress","Reading ground truth data...")
     debug_center.show_in_console(None,"Tech","".join(["Uses ", ground_truth_parser.__class__.__name__, " parser..."]))
-    data_file = open(path,"rU")
-    lines = data_file.readlines()
     parser = ground_truth_parser
-    cells = parser.parse(lines)
-    data_file.close()
+    cells = parser.load_from_file(path)
     debug_center.show_in_console(None,"Progress","Done reading ground truth data...")
     return cells
 
@@ -60,11 +57,8 @@ def read_results(path, parser, name):
     """
     debug_center.show_in_console(None,"Progress","".join(["Reading ", name, " results data..."]))
     debug_center.show_in_console(None,"Tech","".join(["Uses ", parser.__class__.__name__, " parser..."]))
-    data_file = open(path,"rU")
-    lines = data_file.readlines()
-    cells = parser.parse(lines)
+    cells = parser.load_from_file(path)
     make_all_cells_important(cells) # cells cannot use colour temporary
-    data_file.close()
     debug_center.show_in_console(None,"Progress","".join(["Done reading ", name, " result data..."]))
     return (name,cells)
 

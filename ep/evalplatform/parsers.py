@@ -59,7 +59,13 @@ class CSVCellParser():
         else:
             data_split = list(csv.reader([line]))[0]
         return [col.replace(",",".").strip() for col in data_split]
-    
+
+    def load_from_file(self, path):
+        with open(path, "rU") as data_file:
+            lines = data_file.readlines()
+            cells = self.parse(lines)
+        return cells
+
     def set_line(self,line):
         self.columns = self.csv_split(line)
     
