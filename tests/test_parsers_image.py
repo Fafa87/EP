@@ -62,9 +62,19 @@ class TestCellImageParser(unittest.TestCase):
         def load_single_image(f, p):
             misc.imread(p)
             called.append((f, p))
-            return [p]
+            fake = CellOccurence(0,0,0,None)
+            fake.frame_number = 0
+            fake.data = p
+            return [fake]
 
         return load_single_image
+
+    def prepare_merged(self, path, images):
+        f = self.create_temp(path)
+        f.write("Frame, dane\n")
+        for i, m in enumerate(images, 1):
+            f.write(str(i) + "," + m + "\n")
+        f.close()
 
     def test_is_image(self):
         image1_path = "image_1.png"
@@ -76,9 +86,7 @@ class TestCellImageParser(unittest.TestCase):
         self.assertEqual(True, ImageCellParser.is_image(image2_path))
 
         merged_path = "merged.png"
-        f = self.create_temp(merged_path)
-        f.write("\n".join([image1_path, image1_path]))
-        f.close()
+        self.prepare_merged(merged_path, [image1_path, image2_path])
 
         data3 = ImageCellParser.is_image(merged_path)
         self.assertEqual(False, data3)
@@ -92,11 +100,15 @@ class TestCellImageParser(unittest.TestCase):
         self.save_temp(image1_path, self.image_1)
         self.save_temp(image2_path, self.image_2)
 
-        self.assertEqual([image1_path], self.parser.load_from_file(image1_path))
+        res = self.parser.load_from_file(image1_path)
+        self.assertEqual(0, res[0][0])
+        self.assertEqual(image1_path, res[0][1].data)
         self.assertEqual([(1, image1_path)], called)
 
         called[:] = []
-        self.assertEqual([image2_path], self.parser.load_from_file(image2_path))
+        res = self.parser.load_from_file(image2_path)
+        self.assertEqual(0, res[0][0])
+        self.assertEqual(image2_path, res[0][1].data)
         self.assertEqual([(1, image2_path)], called)
 
     def test_load_merged(self):
@@ -109,11 +121,13 @@ class TestCellImageParser(unittest.TestCase):
         self.save_temp(image2_path, self.image_2)
 
         merged_path = "merged.png"
-        f = self.create_temp(merged_path)
-        f.write("\n".join([image1_path, image2_path]))
-        f.close()
+        self.prepare_merged(merged_path, [image1_path, image2_path])
 
-        self.assertEqual([image1_path, image2_path], self.parser.load_from_file(merged_path))
+        res = self.parser.load_from_file(merged_path)
+        self.assertEqual(0, res[0][0])
+        self.assertEqual(0, res[1][0])
+        self.assertEqual(image1_path, res[0][1].data)
+        self.assertEqual(image2_path, res[1][1].data)
         self.assertEqual([(1, image1_path), (2, image2_path)], called)
 
 
@@ -180,6 +194,7 @@ class TestMaskImageParser(unittest.TestCase):
 
         def validate_image1(data):
             self.assertEqual(4, len(data))
+            data = [d[1] for d in data]
             TestCellImageParser.validate_cell(self, data[0], 1, 1, -1, (5, 2), 0)
             TestCellImageParser.validate_cell(self, data[1], 1, 2, -1, (8.545, 5.727), 0)
             TestCellImageParser.validate_cell(self, data[2], 1, 3, -1, (13, 6), 3)
@@ -234,6 +249,7 @@ class TestLabelImageParser(unittest.TestCase):
 
         def validate_image1(data):
             self.assertEqual(4, len(data))
+            data = [d[1] for d in data]
             TestCellImageParser.validate_cell(self, data[0], 1, 1, -1, (8.545, 5.727), 0)
             TestCellImageParser.validate_cell(self, data[1], 1, 2, -1, (13, 6), 0)
             TestCellImageParser.validate_cell(self, data[2], 1, 3, -1, (5, 2), 0)

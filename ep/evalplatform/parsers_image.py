@@ -31,7 +31,8 @@ class ImageCellParser:
             object_mask = label_image == label
 
             # calculate center of mass
-            (y, x) = measures.center_of_mass(object_mask)
+            points_yx = np.nonzero(object_mask)
+            (y, x) = points_yx[0].mean(), points_yx[1].mean()
 
             # create result CellOcurrence
             cell = CellOccurence(frame, label, -1, (x, y))
@@ -53,8 +54,9 @@ class ImageCellParser:
             image_paths = f.readlines()
 
         res = []
-        for i, p in enumerate(image_paths):
-            res += self.load_single_image(i + 1, p.strip())
+        # first line are headers
+        for i, p in list(enumerate(image_paths))[1:]:
+            res += self.load_single_image(i, p.split(',')[1].strip())
         return res
 
     def load_from_file(self, path):
@@ -62,10 +64,12 @@ class ImageCellParser:
             res = self.load_single_image(1, path)
         else:
             res = self.load_from_merged_file(path)
-        return res
+        return [(c.frame_number, c) for c in res]
 
 
 class MaskImageParser(ImageCellParser):
+    symbol = "MASK"
+
     def __init__(self, facultative=[]):
         self.facultative_values = facultative
 
@@ -105,6 +109,8 @@ class MaskImageParser(ImageCellParser):
 
 
 class LabelImageParser(ImageCellParser):
+    symbol = "LABEL"
+
     def parse_image(self, image):
         values = np.unique(image)
         # remap labels to [1..] values

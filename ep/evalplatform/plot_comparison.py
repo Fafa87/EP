@@ -5,6 +5,7 @@ from itertools import *
 
 from .utils import*
 from .parsers import*
+from .parsers_image import*
 from .yeast_datatypes import CellOccurence
 from . import draw_details
 
@@ -12,7 +13,7 @@ SEGMENTATION_GNUPLOT_FILE = "plot_segmentation.plt"
 TRACKING_GNUPLOT_FILE = "plot_tracking.plt"
 
 parsers = [DefaultPlatformParser(), OldGroundTruthParser(), CellProfilerParser(), CellProfilerParserTracking(), CellTracerParser(), CellIDParser(), TrackerParser(), CellSerpentParser(), CellStarParser(), 
-CellProfilerParserTrackingOLDTS2()
+CellProfilerParserTrackingOLDTS2(), LabelImageParser(), MaskImageParser([3])
 ]
 input_type =  dict([(p.symbol,p) for p in parsers])
 
