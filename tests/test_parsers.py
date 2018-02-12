@@ -1,5 +1,3 @@
-### ======= TESTS ======= ###
-        
 import unittest
 import os
 import sys
@@ -27,7 +25,10 @@ class TestCellStarParser(unittest.TestCase):
                 r"""BF_pos0_time0001 (1).mat'"",0,""226"",""113"",""0""",
                 r"""BF_pos0_time0004.mat'"",0,""289"",""340"",""1""",
                 r"""BF_pos0_time0004.mat'"",0,""256"",""123"",""2"""]
-        self.input2 = ["FWEFWEF",'1,1,"287","339,23",0','1,2,"186","301,0"', '1,3,"255","122,1"']
+        self.input2 = ["FWEFWEF",
+                       '1,1,"287","339,23",1',
+                       '1,2,"186","301,0",2',
+                       '1,3,"255","122,1",3']
     
     def test_parse(self):
         cstar_parser = CellStarParser()
