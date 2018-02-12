@@ -66,6 +66,23 @@ class TestCellImageParser(unittest.TestCase):
 
         return load_single_image
 
+    def test_is_image(self):
+        image1_path = "image_1.png"
+        self.save_temp(image1_path, self.image_1)
+        image2_path = "image_1.tif"
+        self.save_temp(image2_path, self.image_1)
+
+        self.assertEqual(True, ImageCellParser.is_image(image1_path))
+        self.assertEqual(True, ImageCellParser.is_image(image2_path))
+
+        merged_path = "merged.png"
+        f = self.create_temp(merged_path)
+        f.write("\n".join([image1_path, image1_path]))
+        f.close()
+
+        data3 = ImageCellParser.is_image(merged_path)
+        self.assertEqual(False, data3)
+
     def test_load_single(self):
         called = []
         self.parser.load_single_image = self.fake_load_single_image(called)

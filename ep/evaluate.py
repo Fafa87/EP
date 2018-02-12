@@ -5,6 +5,7 @@ import re
 import shutil
 import stat
 
+from evalplatform.parsers_image import ImageCellParser
 from evalplatform.utils import *
 import evalplatform.plot_comparison as evaluate
 from evalplatform.utils import debug_center
@@ -75,9 +76,12 @@ def merge_seg_track_files(folder,files):
 def merge_files_into_one(times, folder, files):
     """Merge many files into one, add tmp suffix if not already there."""
     def add_file(write_file,new_file_path,time):
-        new_file = open(new_file_path,"rU")
-        data = new_file.readlines()[1:]
-        new_file.close()
+        if ImageCellParser.is_image(new_file_path):
+            data = [new_file_path]
+        else:
+            new_file = open(new_file_path,"rU")
+            data = new_file.readlines()[1:]
+            new_file.close()
         
         with_frame_number = [",".join([str(time)] + [line.strip() + "\n"]) for line in data]
         write_file.writelines(with_frame_number)
@@ -87,11 +91,16 @@ def merge_files_into_one(times, folder, files):
     output_name = files[0] + ".merged"
     if TMP_SUFFIX not in output_name:
         output_name += TMP_SUFFIX
-    
+
+
     # Read header
-    first_file = open(os.path.join(folder,files[0]),"rU")
-    header = first_file.readlines()[0]
-    first_file.close()
+    first_file_path = os.path.join(folder,files[0])
+    if ImageCellParser.is_image(first_file_path):
+        header = "Filepath\n"
+    else:
+        first_file = open(first_file_path,"rU")
+        header = first_file.readlines()[0]
+        first_file.close()
     
     write_file = open(os.path.join(folder,output_name),"w")
     write_file.writelines("Frame_number, " + header) 

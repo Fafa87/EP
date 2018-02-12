@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import imghdr
 
 import numpy as np
 import scipy.misc as misc
@@ -15,6 +16,10 @@ class ImageCellParser:
     @abstractmethod
     def image_to_labels(self, image):
         return
+
+    @staticmethod
+    def is_image(path):
+        return imghdr.what(path) is not None
 
     def parse_labels(self, frame, label_image, label_to_colour):
         res = []
@@ -53,9 +58,9 @@ class ImageCellParser:
         return res
 
     def load_from_file(self, path):
-        try:
+        if self.is_image(path):
             res = self.load_single_image(1, path)
-        except IOError:
+        else:
             res = self.load_from_merged_file(path)
         return res
 
