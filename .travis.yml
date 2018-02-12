@@ -7,11 +7,11 @@ notifications:
   email: false
 python:
   - 2.7
+  - 3.5
 sudo: false
 virtualenv:
   system_site_packages: true
 before_install:
   - sudo apt-get install python-tk
 script:
-  - python setup.py test -a -x
-  
+  - python setup.py test
