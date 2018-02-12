@@ -58,7 +58,7 @@ class DrawingOverlordABC(object):
             Whether this file should be included in the input images set.
         """
         (_,extension) = os.path.splitext(filename)
-        return extension in [".tif",".jpg",".png"]
+        return extension in [".tiff", ".tif",".jpg",".png"]
 
     def input_images(self, directory):
         directory = directory or "."
@@ -131,7 +131,7 @@ class EvaluationDetails(DrawingOverlordABC):
         (filename,extension) = os.path.splitext(filename_with_ext)
         if not self.required_substring is None and self.required_substring not in filename_with_ext:
             return False
-        return extension in [".tif",".jpg",".png"]
+        return extension in [".tiff", ".tif",".jpg",".png"]
     
     def help_params(self):
         return "details_file, {input_files_substring}, {specific_details_file_type}, {draw_also_correct_results}"
