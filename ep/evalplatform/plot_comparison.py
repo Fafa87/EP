@@ -13,7 +13,7 @@ SEGMENTATION_GNUPLOT_FILE = "plot_segmentation.plt"
 TRACKING_GNUPLOT_FILE = "plot_tracking.plt"
 
 parsers = [DefaultPlatformParser(), OldGroundTruthParser(), CellProfilerParser(), CellProfilerParserTracking(), CellTracerParser(), CellIDParser(), TrackerParser(), CellSerpentParser(), CellStarParser(), 
-CellProfilerParserTrackingOLDTS2(), LabelImageParser(), MaskImageParser([3])
+CellProfilerParserTrackingOLDTS2(), LabelImageParser(), MaskImageParser([2,3])
 ]
 input_type =  dict([(p.symbol,p) for p in parsers])
 
