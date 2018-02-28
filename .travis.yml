@@ -7,7 +7,7 @@ notifications:
   email: false
 python:
   - 2.7
-  - 3.5
+  - 3.4
 sudo: false
 virtualenv:
   system_site_packages: true
