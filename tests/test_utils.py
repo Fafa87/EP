@@ -3,6 +3,48 @@ import unittest
 from ep.evalplatform.utils import *
 
 
+class TestSlices(unittest.TestCase):
+    def test_slice_intersect_inclusion(self):
+        s1 = (slice(0, 10), slice(15,17))
+        s2 = (slice(0, 10), slice(15,17))
+        self.assertEqual(s1, slices_intersection(s1, s2))
+
+        s2 = (slice(0, 15), slice(15,33))
+        self.assertEqual(s1, slices_intersection(s1, s2))
+
+        s2 = (slice(2, 7), slice(15, 16))
+        self.assertEqual(s2, slices_intersection(s1, s2))
+
+    def test_slice_partial_overlap(self):
+        s1 = (slice(0, 10), slice(15, 17))
+        s2 = (slice(5, 13), slice(15, 16))
+        self.assertEqual((slice(5, 10), slice(15, 16)), slices_intersection(s1, s2))
+
+    def test_slice_disjoin(self):
+        s1 = (slice(0, 10), slice(15, 17))
+        s2 = (slice(0, 0), slice(15, 15))
+        self.assertEqual(s2, slices_intersection(s1, s2))
+
+        s2 = (slice(13, 14), slice(0, 18))
+        self.assertEqual((slice(13, 10), slice(15, 17)), slices_intersection(s1, s2))
+
+        s2 = (slice(0, 24), slice(0, 3))
+        self.assertEqual((slice(0, 10), slice(15, 3)), slices_intersection(s1, s2))
+
+    def test_slice_arithmetic(self):
+        s1 = (slice(0, 10), slice(15, 17))
+        s2 = (slice(2, 4), slice(15, 19))
+        self.assertEqual((slice(2, 14), slice(30, 36)), slices_arithmetic(s1, s2, 1, 1))
+
+    def test_slice_relative(self):
+        s1 = (slice(0, 10), slice(15, 17))
+        s2 = (slice(2, 4), slice(15, 19))
+        self.assertEqual((slice(2, 4), slice(0, 4)), slices_relative(s1, s2))
+
+        # handle zeros
+        self.assertEqual((slice(0, 8), slice(0, 2)), slices_relative(s2, s1))
+
+
 class TestPathManipulation(unittest.TestCase):
     def test_split_path(self):
         components = split_path(r"C:\program files\test")
