@@ -39,6 +39,11 @@ class TestColours(unittest.TestCase):
             else:
                 cell.colour = 0
 
+    @unittest.skip("TODO")
+    def test_find_correspondence_with_overlap_usage(self):
+        pass
+
+
     def test_calculate_stats_tracking(self):
         # (last_gt,last_res),last_mapping,(new_gt,new_res),new_mapping
         # len(found_links), len(real_links), len(correct_links))

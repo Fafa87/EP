@@ -117,13 +117,13 @@ def find_correspondence(ground_truth, results):
     Matching:
     [(ground_truth_cell, results_cell)]  -> can easily calculate false positives/negatives and cell count + tracking
     """
-
-    edges = [(distance(g,r),(g,r)) for g in ground_truth for r in results if distance(g,r) < cutoff]
+    # TODO iou cutoff should be configurable in ini file
+    edges = [(g.similarity(r),(g,r)) for g in ground_truth for r in results if g.is_similar(r, cutoff, 0.5)]
     correspondences = []
     matchedGT = set([])
     matchedRes = set([])
 
-    for (d,(a,b)) in sorted(edges, key=lambda x: x[0]):
+    for (d,(a,b)) in sorted(edges, key=lambda x: -x[0]):
         if not b in matchedRes:
             if not a in matchedGT:
                 correspondences.append((a,b))

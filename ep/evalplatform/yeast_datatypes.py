@@ -64,6 +64,13 @@ class CellOccurence:
             return intersect / (self.area + cell_b.area - intersect)
         return None
 
+    def similarity(self, cell_b):
+        iou_with_b = self.iou(cell_b)
+        if iou_with_b:
+            return iou_with_b
+        else:
+            return -self.distance(cell_b)
+
     def is_similar(self, cell_b, position_cutoff, iou_cutoff):
         iou_with_b = self.iou(cell_b)
         if iou_with_b:
