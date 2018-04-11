@@ -24,10 +24,16 @@ class ImageCellParser:
     def parse_labels(self, frame, label_image, label_to_colour):
         res = []
         num_components = label_image.max()
+        objects = measures.find_objects(label_image, num_components)
         for label in range(1, num_components + 1):
             colour = 0
             if label in label_to_colour:
                 colour = label_to_colour[label]
+
+            label_slice = objects[label - 1]
+            if label_slice is None:
+                continue
+
             object_mask = label_image == label
 
             # calculate center of mass
@@ -37,6 +43,8 @@ class ImageCellParser:
             # create result CellOcurrence
             cell = CellOccurence(frame, label, -1, (x, y))
             cell.colour = colour
+            cell.mask = object_mask[label_slice].copy()
+            cell.mask_slice = label_slice
             res.append(cell)
         return res
 

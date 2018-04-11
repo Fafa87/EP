@@ -41,6 +41,54 @@ class TestCellImageParser(unittest.TestCase):
         self.assertAlmostEqual(posxy[1], cell.position[1], 2)
         self.assertEqual(colour, cell.colour)
 
+    def test_cell_slices(self):
+        image = np.zeros((40, 40), dtype=np.uint8)
+        image[8:15, 3:10] = 1
+        image[10:18, 7:13] = 2
+        image[1:3, 30:35] = 3
+        image[33:35, 20:21] = 3
+        cells = self.parser.parse_labels(1, image, {})
+        self.validate(cells[0], 1, 1, -1, (5.12, 10.56), 0)
+        self.validate(cells[1], 1, 2, -1, (9.5, 13.5), 0)
+        self.validate(cells[2], 1, 3, -1, (30, 6.83), 0)
+        assert_array_equal(image[8:15, 3:10] == 1, cells[0].mask)
+        assert_array_equal(image[10:18, 7:13] == 2, cells[1].mask)
+        assert_array_equal(image[1:35, 20:35] == 3, cells[2].mask)
+        self.assertEqual(34, cells[0].area)  # because of overlap in image
+        self.assertEqual(48, cells[1].area)
+        self.assertEqual(2 + 2 * 5, cells[2].area)
+
+        self.assertEqual((slice(8, 15), slice(3, 10)), cells[0].mask_slice)
+        self.assertAlmostEqual(5, cells[0].distance(cells[1]), 0)
+
+        self.assertAlmostEqual(0, cells[0].overlap(cells[1]), 2)
+        self.assertAlmostEqual(0, cells[0].overlap(cells[2]), 2)
+        self.assertAlmostEqual(0, cells[1].overlap(cells[2]), 2)
+
+    def test_cell_overlap(self):
+        image1 = np.zeros((40, 40), dtype=np.uint8)
+        image1[8:15, 3:10] = 1
+        image1[12, 9] = 0  # make overlap non rectanglular
+        image2 = np.zeros((40, 40), dtype=np.uint8)
+        image2[10:18, 7:13] = 2
+        image2[1:3, 30:35] = 3
+        image2[33:35, 20:21] = 3
+        cells = self.parser.parse_labels(1, image1, {})
+        cells += self.parser.parse_labels(1, image2, {})
+        self.validate(cells[0], 1, 1, -1, (5.9375, 10.979), 0)
+        self.validate(cells[1], 1, 2, -1, (9.5, 13.5), 0)
+        self.validate(cells[2], 1, 3, -1, (30, 6.83), 0)
+        assert_array_equal(image1[8:15, 3:10] == 1, cells[0].mask)
+        assert_array_equal(image2[10:18, 7:13] == 2, cells[1].mask)
+        assert_array_equal(image2[1:35, 20:35] == 3, cells[2].mask)
+        self.assertEqual(7 * 7 - 1, cells[0].area)
+        self.assertEqual(48, cells[1].area)
+        self.assertEqual(2 + 2 * 5, cells[2].area)
+
+        self.assertAlmostEqual(15 - 1, cells[0].overlap(cells[1]), 2)
+        self.assertAlmostEqual(0, cells[0].overlap(cells[2]), 2)
+        self.assertAlmostEqual(0, cells[1].overlap(cells[2]), 2)
+
     def test_parse_labels(self):
         image = np.zeros((40, 40), dtype=np.uint8)
         image[8:15, 8:15] = 1
@@ -62,7 +110,7 @@ class TestCellImageParser(unittest.TestCase):
         def load_single_image(f, p):
             misc.imread(p)
             called.append((f, p))
-            fake = CellOccurence(0,0,0,None)
+            fake = CellOccurence(0, 0, 0, None)
             fake.frame_number = 0
             fake.data = p
             return [fake]
