@@ -3,6 +3,7 @@ import sys
 import unittest
 
 from ep.evalplatform import plot_comparison
+from ep.evalplatform.parsers_image import LabelImageParser, MaskImageParser
 from ep.evalplatform.yeast_datatypes import *
 
 
@@ -39,10 +40,23 @@ class TestColours(unittest.TestCase):
             else:
                 cell.colour = 0
 
-    @unittest.skip("TODO")
     def test_find_correspondence_with_overlap_usage(self):
-        pass
+        gt = [c for _,c in MaskImageParser().load_from_file("input/result_gt.tif")]
+        self.assertEqual(2, len(gt))
+        algo = [c for _,c in LabelImageParser().load_from_file("input/result_algo.tif")]
+        self.assertEqual(2, len(algo))
 
+        plot_comparison.cutoff_iou = 0.1
+        matching = plot_comparison.find_correspondence(gt, algo)
+        self.assertEqual(2, len(matching))
+
+        plot_comparison.cutoff_iou = 0.6
+        matching = plot_comparison.find_correspondence(gt, algo)
+        self.assertEqual(1, len(matching))
+
+        plot_comparison.cutoff_iou = 0.9
+        matching = plot_comparison.find_correspondence(gt, algo)
+        self.assertEqual(0, len(matching))
 
     def test_calculate_stats_tracking(self):
         # (last_gt,last_res),last_mapping,(new_gt,new_res),new_mapping

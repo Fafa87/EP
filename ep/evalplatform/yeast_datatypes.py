@@ -60,20 +60,20 @@ class CellOccurence:
 
     def iou(self, cell_b):
         if self.has_contour_data() and cell_b.has_contour_data():
-            intersect = self.overlap(cell_b)
+            intersect = float(self.overlap(cell_b))
             return intersect / (self.area + cell_b.area - intersect)
         return None
 
     def similarity(self, cell_b):
         iou_with_b = self.iou(cell_b)
-        if iou_with_b:
+        if iou_with_b is not None:
             return iou_with_b
         else:
             return -self.distance(cell_b)
 
     def is_similar(self, cell_b, position_cutoff, iou_cutoff):
         iou_with_b = self.iou(cell_b)
-        if iou_with_b:
+        if iou_with_b is not None:
             return iou_with_b > iou_cutoff
         else:
             return self.distance(cell_b) < position_cutoff

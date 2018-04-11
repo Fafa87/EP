@@ -21,7 +21,8 @@ ground_truth_parser = OldGroundTruthParser()
 
 # Max match distance. Read from: evaluation.ini at program folder then use this default.
 loaded_ini = False
-cutoff = 30 # pixels
+cutoff = 30  # pixels
+cutoff_iou = 0.5  # TODO iou cutoff should be configurable in ini file
 output_evaluation_details = 0
 draw_evaluation_details = 0
 
@@ -117,8 +118,7 @@ def find_correspondence(ground_truth, results):
     Matching:
     [(ground_truth_cell, results_cell)]  -> can easily calculate false positives/negatives and cell count + tracking
     """
-    # TODO iou cutoff should be configurable in ini file
-    edges = [(g.similarity(r),(g,r)) for g in ground_truth for r in results if g.is_similar(r, cutoff, 0.5)]
+    edges = [(g.similarity(r),(g,r)) for g in ground_truth for r in results if g.is_similar(r, cutoff, cutoff_iou)]
     correspondences = []
     matchedGT = set([])
     matchedRes = set([])
