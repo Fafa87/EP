@@ -1,6 +1,6 @@
 import numpy as np
 from cached_property import cached_property
-from utils import slices_intersection, slices_relative
+from .utils import slices_intersection, slices_relative
 
 
 class CellOccurence:

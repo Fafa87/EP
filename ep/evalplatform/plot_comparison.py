@@ -34,7 +34,7 @@ def filter_border(celllist):
     elif(len(celllist[0]) == 2):
         return [(cell_A, cell_B) for (cell_A, cell_B) in celllist if not cell_A.obligatory() or not cell_B.obligatory()] 
     else:
-        print celllist
+        print (celllist)
     
 def read_ground_truth(path):
     """
@@ -161,12 +161,12 @@ def calculate_precision_recall_F_metrics(algorithm_number, real_number, correct_
     if algorithm_number == 0:  
         precision = 0
     else:
-        precision =  correct_number/algorithm_number
+        precision = float(correct_number)/algorithm_number
     if real_number == correct_number: # 0 / 0
         recall = 1
     else:
-        recall = correct_number/real_number
-    return (precision, recall, 2*correct_number/(real_number+algorithm_number))   #precision*recall/(precision+recall))
+        recall = float(correct_number)/real_number
+    return (precision, recall, 2*float(correct_number)/(real_number+algorithm_number))   #precision*recall/(precision+recall))
 
 def calculate_metrics_segmentation(params):
     """
@@ -175,7 +175,7 @@ def calculate_metrics_segmentation(params):
     """
     (cell_count_results, cell_count_ground_truth, correspondences, false_positives, false_negatives) = params
     prf = calculate_precision_recall_F_metrics(cell_count_results, cell_count_ground_truth, correspondences)
-    return tuple([cell_count_results/cell_count_ground_truth]) + prf
+    return tuple([float(cell_count_results)/cell_count_ground_truth]) + prf
 
 def calculate_stats_tracking(params_last,last_mapping,params_new,new_mapping):
     """
@@ -266,7 +266,7 @@ def run_script(args):
         algorithm_results_csv_file = args[2]
         algorithm_results_type = args[3]
 
-        if(not input_type.has_key(algorithm_results_type)):
+        if algorithm_results_type not in input_type:
             debug_center.show_in_console(None,"Error","ERROR: " + algorithm_results_type + " is not supported. There are supported types: " + str(input_type))
             sys.exit()
         else:

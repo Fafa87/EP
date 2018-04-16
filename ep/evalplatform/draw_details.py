@@ -176,7 +176,7 @@ def SaveFigureAsImage(fileName,fig=None,**kwargs):
     fig_size = fig.get_size_inches()
     w,h = fig_size[0], fig_size[1]
     fig.patch.set_alpha(0)
-    if kwargs.has_key('orig_size'): # Aspect ratio scaling if required
+    if 'orig_size' in kwargs: # Aspect ratio scaling if required
         w,h = kwargs['orig_size']
         w2,h2 = fig_size[0],fig_size[1]
         fig.set_size_inches([(w2/w)*w,(w2/w)*h])
@@ -204,7 +204,7 @@ get_path_new_file = lambda directory,filename: os.path.join(directory,"".join([o
 def get_trailing_number(filepath):
     filename = os.path.splitext(filepath)[0]
     reversed_name = filename[::-1]
-    m = re.search("\D", reversed_name)
+    m = re.search("\D", reversed_name + " ")
     return int(reversed_name[:m.start()][::-1])
 
 

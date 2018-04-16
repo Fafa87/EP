@@ -32,9 +32,9 @@ def find_all_created_directories(folder):
     return [os.path.join(folder,d) for d in directories]
     
 def get_trailing_number(text):
-        reversed = text[::-1]
-        m = re.search("\D", reversed)
-        return int(reversed[:m.start()][::-1])
+    reversed = text[::-1]
+    m = re.search("\D", reversed + " ")
+    return int(reversed[:m.start()][::-1])
         
 def determine_all_snaptimes(file_names):
     """Return list of times."""
@@ -123,7 +123,8 @@ def parse_data(args, parent_folder):
         seg_name = args[1]
         track_name = args[2]
         return (args[3:],(folder,seg_name,track_name))
-        
+
+
 
 if __name__ == '__main__':
     debug_center.configure(CONFIG_FILE)

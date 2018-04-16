@@ -2,6 +2,7 @@ import csv
 import os
 import stat
 import sys
+from functools import reduce
 
 import numpy as np
 
@@ -142,6 +143,13 @@ def package_path(filename, quoted=1):
     return name
 
 
+def open_csv(path, mode):
+    try:
+        return open(path, mode, newline='')
+    except TypeError:
+        return open(path, mode + "b")
+
+
 def read_from_csv(path):
     """
     Args::
@@ -149,7 +157,7 @@ def read_from_csv(path):
     Returns::
         (headers,[record])
     """
-    opened_file = open(path, "rb")
+    opened_file = open_csv(path, "r")
     lines = list(csv.reader(opened_file))
     opened_file.close()
     return (lines[0], lines[1:])
@@ -162,7 +170,7 @@ def write_to_csv(headers, records, path):
         records - list of records where every record is a list
         path - full path of the created csv file
     """
-    opened_file = open(path, "wb")
+    opened_file = open_csv(path, "w")
     cw = csv.writer(opened_file)
     cw.writerows([headers] + sorted(records))
     opened_file.close()

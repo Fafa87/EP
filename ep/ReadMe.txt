@@ -4,6 +4,7 @@ version 1.0.1
 1a. Requirements
 - Python version 2.7!
 - PIL (python library)
+- imageio (python library)
 - Gnuplot (should be available from command line)
 - Tested only on Windows XP and Mac OS X 10.7.5 and Ubuntu
 
@@ -13,6 +14,7 @@ sudo pip install matplotlib
 sudo apt-get install python-tk
 sudo apt-get install gnuplot
 sudo pip install Pillow
+sudo pip install imageio
 
 1c. Additional naming requirements
 - no results data file can contain ".eval." or ".tmp" in its name
