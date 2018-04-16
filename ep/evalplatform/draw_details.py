@@ -2,6 +2,7 @@ import sys
 import os
 import re
 
+import imageio
 import scipy.misc as misc
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -235,15 +236,15 @@ def run(overlord, directory_images, directory_output, desired_output_file_prefix
         return os.path.join(directory_images,filename)
         
     keyfunc = lambda req: req.file
-    requests = sorted(requests, lambda x,y: keyfunc(x)<keyfunc(y))
+    requests = sorted(requests, key=keyfunc)
     file_groups = itertools.groupby(requests,keyfunc)
     
     debug_center.show_in_console(None, "Progress", "Applying requests on input images...")
-    
     for file,group in file_groups:
         filename = os.path.basename(file)
-        requests = list(group)  
-        image = mpimg.imread(get_old_path_file(file))
+        requests = list(group)
+        image_raw = imageio.imread(get_old_path_file(file))
+        image = image_raw.astype(float) / np.iinfo(image_raw.dtype).max
         fig = plt.figure(frameon=False)
         plt.axis('off')
         ax = plt.Axes(fig, [0., 0., 1., 1.])
