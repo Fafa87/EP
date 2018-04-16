@@ -22,7 +22,7 @@ ground_truth_parser = OldGroundTruthParser()
 # Max match distance. Read from: evaluation.ini at program folder then use this default.
 loaded_ini = False
 cutoff = 30  # pixels
-cutoff_iou = 0.5  # TODO iou cutoff should be configurable in ini file
+cutoff_iou = 0.3  # intersection / union
 output_evaluation_details = 0
 draw_evaluation_details = 0
 
@@ -214,28 +214,27 @@ def calculate_stats_tracking(params_last,last_mapping,params_new,new_mapping):
 
 
 def load_general_ini(path):
-    global input_type, ground_truth_parser, cutoff, draw_evaluation_details, ignored_frame_size, loaded_ini
+    global cutoff, cutoff_iou, draw_evaluation_details, ignored_frame_size, loaded_ini
     loaded_ini = True
-    if read_ini(CONFIG_FILE, 'evaluation', 'maxmatchdistance') != '':
-        cutoff = float(read_ini(CONFIG_FILE, 'evaluation', 'maxmatchdistance'))
-    if read_ini(CONFIG_FILE, 'evaluation', 'drawevaluationdetails') != '':
-        draw_evaluation_details = float(read_ini(CONFIG_FILE, 'evaluation', 'drawevaluationdetails'))
-    if read_ini(CONFIG_FILE, 'evaluation', 'ignoredframesize') != '':
-        ignored_frame_size = float(read_ini(CONFIG_FILE, 'evaluation', 'ignoredframesize'))
+    if read_ini(path, 'evaluation', 'maxmatchdistance') != '':
+        cutoff = float(read_ini(path, 'evaluation', 'maxmatchdistance'))
+    if read_ini(path, 'evaluation', 'miniousimilarity') != '':
+        cutoff_iou = float(read_ini(path, 'evaluation', 'miniousimilarity'))
+    if read_ini(path, 'evaluation', 'drawevaluationdetails') != '':
+        draw_evaluation_details = float(read_ini(path, 'evaluation', 'drawevaluationdetails'))
+    if read_ini(path, 'evaluation', 'ignoredframesize') != '':
+        ignored_frame_size = float(read_ini(path, 'evaluation', 'ignoredframesize'))
 
 
 def run_script(args):
-    global input_type,ground_truth_parser,cutoff,draw_evaluation_details
+    global ground_truth_parser, output_evaluation_details
 
     if(len(args) < 4):
         print("".join(["Parameters: \n<ground_truth_csv_file> {/SegOnly} {<ground_truth_type>} <algorithm_results_csv_file> <algorithm_results_type> [algorithm_name] [ground_truth_seg_csv_file]" ]))
-    else: 
-        if read_ini(CONFIG_FILE,'evaluation','maxmatchdistance') != '':
-            cutoff = float(read_ini(CONFIG_FILE,'evaluation','maxmatchdistance'))
+    else:
+        load_general_ini(CONFIG_FILE)
         if read_ini(CONFIG_FILE,'evaluation','outputevaluationdetails') != '':
             output_evaluation_details = float(read_ini(CONFIG_FILE,'evaluation','outputevaluationdetails'))
-        if read_ini(CONFIG_FILE,'evaluation','drawevaluationdetails') != '':
-            draw_evaluation_details = float(read_ini(CONFIG_FILE,'evaluation','drawevaluationdetails'))
         if read_ini(CONFIG_FILE,'plot','terminal') != '':
             terminal_type = read_ini(CONFIG_FILE,'plot','terminal').strip()    
         
