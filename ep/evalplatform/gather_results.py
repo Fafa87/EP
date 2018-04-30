@@ -4,8 +4,8 @@ import shutil
 import subprocess
 from PIL import Image
 
-from utils import*
-from create_report import create_report, create_sensible_report
+from .utils import*
+from .create_report import create_report, create_sensible_report
 images_sufixes = [SEGPLOT_SUFFIX,TRACKPLOT_SUFFIX]
 SUMMARY_GNUPLOT_FILE = "plot_summary.plt"
 terminal_type = "png"
@@ -15,7 +15,7 @@ def join2(path):
     imA = Image.open(os.path.join(path,"M1.png"))
     imB = Image.open(os.path.join(path,"M2.png"))
     image_size = imA.size
-    half_size = (image_size[0]/2,image_size[1]/2)
+    half_size = (image_size[0]//2,image_size[1]//2)
     
     imA = imA.resize(half_size,Image.ANTIALIAS)
     imB = imB.resize(half_size,Image.ANTIALIAS)
@@ -107,7 +107,7 @@ def run_show_results(showSuccess, showFailed, result):
     else:
         debug_center.show_in_console(None,"Error", showFailed)
 
-def create_additional_plots(title, (name_data_paths), set_number, output_name):
+def create_additional_plots(title, name_data_paths, set_number, output_name):
     """
     @param set_number: first element is 0
     """
@@ -157,7 +157,7 @@ def create_additional_plots(title, (name_data_paths), set_number, output_name):
         os.remove(temp_file);
         return 0
         
-    except IOError, e:
+    except IOError as e:
         debug_center.show_in_console(None,"Error", ("ERROR: Could not create cross plot: {}".format(e)))
         return -1
 
@@ -223,7 +223,7 @@ def run_script(args):
         if read_ini(CONFIG_FILE,'plot','terminal') != '':
             terminal_type = read_ini(CONFIG_FILE,'plot','terminal').strip()    
         
-        algorithm_number = (len(args)-1) / 2
+        algorithm_number = (len(args)-1) // 2
         
         results_folder = args[1]
         algorithm_results = []

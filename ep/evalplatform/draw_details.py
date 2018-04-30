@@ -94,7 +94,7 @@ class TrackingDetail(PaintRequestABC):
         self.draw_line(axis, link.cell_A.position, link.cell_B.position, detail.result)
         pass
 
-EvaluationType = Enum("SEGMENTATION","TRACKING","WTF")    
+EvaluationType = Enum("SEGMENTATION","TRACKING","MISC")
 class EvaluationDetails(DrawingOverlordABC):
     def __init__(self, params):
         self.details_file = params[0]
@@ -117,7 +117,7 @@ class EvaluationDetails(DrawingOverlordABC):
         elif TRACKDETAILS_SUFFIX in filepath or LONGTRACKDETAILS_SUFFIX in filepath:
             return EvaluationType.TRACKING
         else:
-            return EvaluationType.WTF
+            return EvaluationType.MISC
         
     def image_filter(self,filename_with_ext):
         """

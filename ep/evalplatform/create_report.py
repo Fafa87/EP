@@ -33,7 +33,7 @@ def create_report(summary_file_path,precision,format,output_file):
         measure_f = [dd for dd in d[1:] if measure_type in dd or len(dd.split(":")[1].strip()) == 0]
         measures = [m.split(":")[0].strip() for m in measure_f[::2]]
         values = [float(m.split(":")[1]) for m in measure_f[1::2]]
-        measure_value = zip(measures,values)
+        measure_value = list(zip(measures,values))
         algo_results_parsed.append((algo_name,measure_value))
     
     # output report
