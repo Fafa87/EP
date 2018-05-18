@@ -161,11 +161,15 @@ class SegmentationResult(EvaluationDetail):
     """
 
     def __init__(self, cell_gt=None, cell_algo=None):
+        self.iou = None
         if (not (cell_gt is None and cell_algo is None)):
             EvaluationDetail.__init__(self, (cell_gt or cell_algo).frame_number,
                                       self.calculate_result(cell_gt, cell_algo))
             self.cell_GT = cell_gt
             self.cell_algo = cell_algo
+
+            if cell_gt is not None and cell_algo is not None:
+                self.iou = self.cell_GT.iou(self.cell_algo)
         else:
             self.cell_GT = None
             self.cell_algo = None
@@ -175,7 +179,7 @@ class SegmentationResult(EvaluationDetail):
 
     @staticmethod
     def csv_headers():
-        return EvaluationDetail.csv_headers() + ["GT_id", "GT_pos_x", "GT_pos_y", "Algo_id", "Algo_pos_x", "Algo_pos_y"]
+        return EvaluationDetail.csv_headers() + ["GT_id", "GT_pos_x", "GT_pos_y", "Algo_id", "Algo_pos_x", "Algo_pos_y", "IOU"]
 
     def csv_record(self):
         record = EvaluationDetail.csv_record(self)
@@ -189,6 +193,8 @@ class SegmentationResult(EvaluationDetail):
 
         record = print_cell(record, self.cell_GT)
         record = print_cell(record, self.cell_algo)
+
+        record += [self.iou]
         return record
 
     def csv_read(self, record):
