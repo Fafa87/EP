@@ -4,7 +4,7 @@ from .utils import slices_intersection, slices_relative
 
 
 class CellOccurence:
-    def __init__(self, frame_number, cell_id, unique_id, position):
+    def __init__(self, frame_number, cell_id, unique_id, position, colour=0):
         """
         All parameters should be greater that zero.
         Unique_id == -1 means that there is no tracking data.
@@ -15,7 +15,7 @@ class CellOccurence:
         self.cell_id = cell_id
         self.unique_id = unique_id
         self.position = position
-        self.colour = 0
+        self.colour = colour
 
         self.mask = None
         self.mask_slice = None
@@ -79,13 +79,13 @@ class CellOccurence:
             return self.distance(cell_b) < position_cutoff
 
     def __hash__(self):
-        return hash(self.frame_number) ^ hash(self.get_id()) ^ hash(self.position)
+        return hash(self.frame_number) ^ hash(self.get_id()) ^ hash(self.position) ^ hash(self.colour)
 
     def __eq__(self, other):
-        return self.frame_number == other.frame_number and self.get_id() == other.get_id() and self.position == other.position
+        return self.frame_number == other.frame_number and self.get_id() == other.get_id() and self.position == other.position and self.colour == other.colour
 
     def __str__(self):
-        return "frame={0},id={1},position={2}".format(self.frame_number, self.get_id(), self.position)
+        return "frame={0},id={1},position={2},color={3}".format(self.frame_number, self.get_id(), self.position, self.colour)
 
 
 class TrackingLink(object):
