@@ -11,7 +11,7 @@ try:
 except:
     import ConfigParser
 
-from . import debug
+from ep.evalplatform import debug
 
 CONFIG_FILENAME = "evaluation.ini"
 

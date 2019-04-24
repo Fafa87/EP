@@ -6,7 +6,7 @@ try:
 except ImportError:
     from io import StringIO
 
-from .yeast_datatypes import*
+from ep.evalplatform.yeast_datatypes import*
 
 ### ======= CELLPARSER HIERARCHY ======= ###
 

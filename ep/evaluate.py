@@ -5,10 +5,10 @@ import re
 import shutil
 import stat
 
-from evalplatform.parsers_image import ImageCellParser
-from evalplatform.utils import *
-import evalplatform.plot_comparison as evaluate
-from evalplatform.utils import debug_center
+from ep.evalplatform.parsers_image import ImageCellParser
+from ep.evalplatform.utils import *
+import ep.evalplatform.plot_comparison as evaluate
+from ep.evalplatform.utils import debug_center
 
 TMP_SUFFIX = ".tmp" # every added intermediate file has tmp suffix in the name, such files are omitted in case of evaluation.
 DEFAULT_PARSER = "PLATFORM_DEF"

@@ -1,10 +1,10 @@
 #!/usr/bin/env python2
 import sys
 import os
-from evalplatform.utils import *
-import evalplatform.gather_results as comparison
-from evalplatform.utils import debug_center
-import evaluate
+from ep.evalplatform.utils import *
+import ep.evalplatform.gather_results as comparison
+from ep.evalplatform.utils import debug_center
+import ep.evaluate
 
 def find_eval(folder):
     if not os.path.isdir(folder):

@@ -3,11 +3,11 @@ import sys
 import os
 from itertools import *
 
-from .utils import*
-from .parsers import*
-from .parsers_image import*
-from .yeast_datatypes import CellOccurence
-from . import draw_details
+from ep.evalplatform.utils import*
+from ep.evalplatform.parsers import*
+from ep.evalplatform.parsers_image import*
+from ep.evalplatform.yeast_datatypes import CellOccurence
+import ep.evalplatform.draw_details
 
 SEGMENTATION_GNUPLOT_FILE = "plot_segmentation.plt"
 TRACKING_GNUPLOT_FILE = "plot_tracking.plt"
