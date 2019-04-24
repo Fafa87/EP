@@ -6,6 +6,7 @@ from ep.evalplatform import plot_comparison
 from ep.evalplatform.parsers_image import LabelImageParser, MaskImageParser
 from ep.evalplatform.yeast_datatypes import *
 
+from tests.test_parsers_image import TestMaskImageParser
 
 class TestColours(unittest.TestCase):
     # 3 proper cells in GT + 3 border ones
@@ -41,9 +42,9 @@ class TestColours(unittest.TestCase):
                 cell.colour = 0
 
     def test_find_correspondence_with_overlap_usage(self):
-        gt = [c for _,c in MaskImageParser().load_from_file("input/result_gt.tif")]
+        gt = [c for _,c in MaskImageParser().load_from_file(TestMaskImageParser.RESULT_GT_PATH) ]
         self.assertEqual(2, len(gt))
-        algo = [c for _,c in LabelImageParser().load_from_file("input/result_algo.tif")]
+        algo = [c for _,c in LabelImageParser().load_from_file(TestMaskImageParser.RESULT_ALGO_PATH)]
         self.assertEqual(2, len(algo))
 
         plot_comparison.cutoff_iou = 0.1

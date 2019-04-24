@@ -108,7 +108,7 @@ class TestCellImageParser(unittest.TestCase):
 
     def fake_load_single_image(self, called):
         def load_single_image(f, p):
-            misc.imread(p)
+            imageio.imread(p)
             called.append((f, p))
             fake = CellOccurence(0, 0, 0, None)
             fake.frame_number = 0
@@ -180,6 +180,9 @@ class TestCellImageParser(unittest.TestCase):
 
 
 class TestMaskImageParser(unittest.TestCase):
+    RESULT_GT_PATH = os.path.join(os.path.dirname(__file__), "input", "result_gt.tif")
+    RESULT_ALGO_PATH = os.path.join(os.path.dirname(__file__), "input", "result_algo.tif")
+
     def setUp(self):
         self.parser = MaskImageParser(facultative=[3])
         self.to_clear = []
@@ -221,18 +224,18 @@ class TestMaskImageParser(unittest.TestCase):
         self.assertEqual(True, self.parser.is_relevant(3))
 
     def test_two_cell_mask_and_labels(self):
-        gt = self.parser.load_from_file("input/result_gt.tif")
+        gt = self.parser.load_from_file(TestMaskImageParser.RESULT_GT_PATH)
         self.assertEqual(2, len(gt))
         TestCellImageParser.validate_cell(self, gt[0][1], 1, 1, -1, (21, 8), 0, precision=0)
         TestCellImageParser.validate_cell(self, gt[1][1], 1, 2, -1, (22, 22), 0, precision=0)
-        self.assertNotEqual(None, gt[0][1].mask)
+        self.assertIsNotNone(gt[0][1].mask)
 
         parser_label = LabelImageParser()
-        algo = parser_label.load_from_file("input/result_algo.tif")
+        algo = parser_label.load_from_file(TestMaskImageParser.RESULT_ALGO_PATH)
         self.assertEqual(2, len(algo))
         TestCellImageParser.validate_cell(self, algo[0][1], 1, 1, -1, (21, 7), 0, precision=0)
         TestCellImageParser.validate_cell(self, algo[1][1], 1, 2, -1, (22, 21), 0, precision=0)
-        self.assertNotEqual(None, algo[0][1].mask)
+        self.assertIsNotNone(algo[0][1].mask)
 
     def test_image_to_labels(self):
         labels, colours = self.parser.image_to_labels(self.image_1)

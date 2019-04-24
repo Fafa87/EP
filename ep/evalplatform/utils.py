@@ -199,7 +199,7 @@ def read_from_file(path):
     joined = opened_file.read()
     opened_file.close()
 
-    return [[(float(line.split(" ")[0]), float(line.split(" ")[1])) for line in dataset.split("\n")] for dataset in
+    return [[(float(line.split(" ")[0].replace("\"","")), float(line.split(" ")[1])) for line in dataset.split("\n")] for dataset in
             joined.split("\n\n\n")]
 
 

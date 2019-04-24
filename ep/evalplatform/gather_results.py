@@ -4,8 +4,8 @@ import shutil
 import subprocess
 from PIL import Image
 
-from .utils import*
-from .create_report import create_report, create_sensible_report
+from ep.evalplatform.utils import*
+from ep.evalplatform.create_report import create_report, create_sensible_report
 images_sufixes = [SEGPLOT_SUFFIX,TRACKPLOT_SUFFIX]
 SUMMARY_GNUPLOT_FILE = "plot_summary.plt"
 terminal_type = "png"

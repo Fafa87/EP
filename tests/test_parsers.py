@@ -17,7 +17,7 @@ class TestCellTracerParser(unittest.TestCase):
 
     def test_parse(self):
         ct_parser = CellTracerParser()
-        output = list(zip(*ct_parser.parse(self.input))[1])
+        output = list(list(zip(*ct_parser.parse(self.input)))[1])
         correct_out = [CellOccurence(1, 1, 1, (284.75, 256.65), 0),
                        CellOccurence(1, 2, 2, (306.8, 235.28), 0),
                        CellOccurence(1, 3, 3, (318.05, 264.6), 0),
@@ -37,7 +37,7 @@ class TestCellStarParser(unittest.TestCase):
 
     def test_parse(self):
         cstar_parser = CellStarParser()
-        output = list(zip(*cstar_parser.parse(self.input))[1])
+        output = list(list(zip(*cstar_parser.parse(self.input)))[1])
         correct2_out = [CellOccurence(1, 1, 1, (287.0, 339.23)),
                         CellOccurence(1, 2, 2, (186.0, 301.0)),
                         CellOccurence(1, 3, 3, (255.0, 122.1)),

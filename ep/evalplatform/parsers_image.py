@@ -2,7 +2,7 @@ from abc import abstractmethod
 import imghdr
 
 import numpy as np
-import scipy.misc as misc
+import imageio
 import scipy.ndimage
 import scipy.ndimage.measurements as measures
 
@@ -49,7 +49,7 @@ class ImageCellParser:
         return res
 
     def load_single_image(self, frame, path):
-        image = misc.imread(path)
+        image = imageio.imread(path)
         label_image, label_to_colour = self.image_to_labels(image)
         return self.parse_labels(frame, label_image, label_to_colour)
 

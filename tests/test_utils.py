@@ -47,10 +47,10 @@ class TestSlices(unittest.TestCase):
 
 class TestPathManipulation(unittest.TestCase):
     def test_split_path(self):
-        components = split_path(r"C:\program files\test")
+        components = split_path(os.path.join("C:\\", "program files", "test"))
         self.assertEqual(components, ["C:\\", "program files", "test"])
 
-        components = split_path(r"program files\test\\")
+        components = split_path(r"program files/test/")
         self.assertEqual(components, ["program files", "test", ""])
 
     def test_determine_output_path(self):
@@ -62,12 +62,12 @@ class TestPathManipulation(unittest.TestCase):
         file_path = r"c:\TestSet1\Results\Mine\res.png"
         output_path = "Output"
         result = determine_output_filepath(file_path, output_path)
-        self.assertEqual(result, r"c:\TestSet1\Results\Mine\Output\res.png")
+        self.assertEqual(result, os.path.join("c:\\", "TestSet1", "Results", "Mine", "Output", "res.png"))
 
         file_path = r"c:\TestSet1\Results\Mine\res.png"
         output_path = "d:\Output"
         result = determine_output_filepath(file_path, output_path)
-        self.assertEqual(result, r"d:\Output\Mine\res.png")
+        self.assertEqual(result, os.path.join("d:\\", "Output", "Mine", "res.png"))
 
 
 class TestINI(unittest.TestCase):
