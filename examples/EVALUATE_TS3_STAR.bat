@@ -1,1 +1,1 @@
-python evaluate.py TestSet3 "GroundTruth" "gt_seg" "gt_track" CellStar "CellStar" "cs_seg" "cs_track"
+python -m ep.evaluate TestSet3 "GroundTruth" "gt_seg" "gt_track" CellStar "CellStar" "cs_seg" "cs_track"
