@@ -7,7 +7,7 @@ from ep.evalplatform.utils import*
 from ep.evalplatform.parsers import*
 from ep.evalplatform.parsers_image import*
 from ep.evalplatform.yeast_datatypes import CellOccurence
-import ep.evalplatform.draw_details
+from ep.evalplatform import draw_details
 
 SEGMENTATION_GNUPLOT_FILE = "plot_segmentation.plt"
 TRACKING_GNUPLOT_FILE = "plot_tracking.plt"
@@ -190,8 +190,8 @@ def calculate_stats_tracking(params_last,last_mapping,params_new,new_mapping):
     new_gt = [c for c in new_gt if c.obligatory()]
 
     # leaves only cell from results the ones matched with the obligatory cells or not matched at all
-    last_res = [c for c in last_res if (last_mapping == [] or (c not in zip(*last_mapping)[1])) or (zip(*last_mapping)[0][zip(*last_mapping)[1].index(c)].obligatory())] # searches in [(a,b)] for the a when given b.  
-    new_res = [c for c in new_res if (new_mapping == [] or (c not in zip(*new_mapping)[1])) or (zip(*new_mapping)[0][zip(*new_mapping)[1].index(c)].obligatory())]
+    last_res = [c for c in last_res if (last_mapping == [] or (c not in list(zip(*last_mapping))[1])) or (list(zip(*last_mapping))[0][list(zip(*last_mapping))[1].index(c)].obligatory())] # searches in [(a,b)] for the a when given b.
+    new_res = [c for c in new_res if (new_mapping == [] or (c not in list(zip(*new_mapping))[1])) or (list(zip(*new_mapping))[0][list(zip(*new_mapping))[1].index(c)].obligatory())]
 
     # ignore mapping connected to the non-obligatory GT cells 
     last_mapping = [(gt,res) for (gt,res) in last_mapping if gt.obligatory()]
@@ -207,8 +207,8 @@ def calculate_stats_tracking(params_last,last_mapping,params_new,new_mapping):
     found_links = [TrackingLink(last,new) for last in last_res for new in new_res if last.unique_id==new.unique_id]
 
     correct_results = [TrackingResult(link_gt,link_res) for (link_res,link_gt) in correct_links]
-    false_negatives = [TrackingResult(gt,None) for gt in real_links if correct_links == [] or gt not in zip(*correct_links)[1]]
-    false_positives = [TrackingResult(None,res) for res in found_links if correct_links == [] or res not in zip(*correct_links)[0]]
+    false_negatives = [TrackingResult(gt,None) for gt in real_links if correct_links == [] or gt not in list(zip(*correct_links))[1]]
+    false_positives = [TrackingResult(None,res) for res in found_links if correct_links == [] or res not in list(zip(*correct_links))[0]]
     
     return (found_links, real_links, correct_results, false_positives, false_negatives) # evaluation_details
 

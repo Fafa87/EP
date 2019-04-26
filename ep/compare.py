@@ -34,7 +34,7 @@ else:
     debug_center.configure(CONFIG_FILE)
     algorithm_number = len(sys.argv)-2
     
-    results_folder = os.path.join(evaluate.OUTPUT_FOLDER,sys.argv[1])
+    results_folder = os.path.join(ep.evaluate.OUTPUT_FOLDER,sys.argv[1])
     algorithm_results = []
     for i in range(algorithm_number):
         algorithm_results.append(sys.argv[i+2])

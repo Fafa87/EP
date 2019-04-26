@@ -66,7 +66,7 @@ class TestColours(unittest.TestCase):
         self.apply_colours(self.frame1GT, self.dictionary_colour)
         wyniki = plot_comparison.calculate_stats_tracking((self.frame0GT, self.frame0Res), self.frame0Mapping,
                                                           (self.frame1GT, self.frame1Res), self.frame1Mapping)
-        self.assertEqual([2, 3, 2], map(len, wyniki[:3]))
+        self.assertEqual([2, 3, 2], list(map(len, wyniki[:3])))
         # precision = 100%
         # recall = 66%
 
@@ -75,7 +75,7 @@ class TestColours(unittest.TestCase):
         self.apply_colours(self.frame1GT, {})
         wyniki = plot_comparison.calculate_stats_tracking((self.frame0GT, self.frame0Res), self.frame0Mapping,
                                                           (self.frame1GT, self.frame1Res), self.frame1Mapping)
-        self.assertEqual([3, 5, 3], map(len, wyniki[:3]))
+        self.assertEqual([3, 5, 3], list(map(len, wyniki[:3])))
         # precision = 100%
         # recall = 60%
 
