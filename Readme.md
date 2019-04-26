@@ -1,8 +1,8 @@
 # EVALUATION TOOL FOR CELL SEGMENTATION AND TRACKING
-version 1.0.1
+version 1.1.0
 
 ## Requirements
-- Python version 2.7!
+- Python version 2.7, 3.7
 - PIL (python library)
 - Gnuplot (should be available from command line)
 - Tested only on Windows XP and Mac OS X 10.7.5 and Ubuntu

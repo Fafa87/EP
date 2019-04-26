@@ -1,8 +1,8 @@
 EVALUATION TOOL FOR CELL SEGMENTATION AND TRACKING
-version 1.0.1
+version 1.1.0
 
 1a. Requirements
-- Python version 2.7!
+- Python version 2.7, 3.7
 - PIL (python library)
 - imageio (python library)
 - Gnuplot (should be available from command line)
@@ -24,14 +24,15 @@ sudo pip install imageio
 2. Instalation
 	put files in your main comparison folder (see usage examples):
 	Comparison
-		---> evalplatform
-		---> TestSet1
-			 ---> GroundTruth
-			 ---> RawData (optionally to show evaluation details)
-			 ---> Algo1
-			 ---> Algo2
-		compare.py
-		evaluate.py
+	    ---> ep
+            ---> evalplatform
+            ---> TestSet1
+                 ---> GroundTruth
+                 ---> RawData (optionally to show evaluation details)
+                 ---> Algo1
+                 ---> Algo2
+            ---> compare.py
+            ---> evaluate.py
 	
 3. Configuration 
 	There is evaluation.ini file which contains:
@@ -43,7 +44,7 @@ sudo pip install imageio
 		Values are: 1 (Errors), 2 (+Warnings), 3 (+Informations), 3.1 (+Evaluation progress), 3.2 (+platform technicalities)
 	- terminal is the output plots format, supported values are "svg" and "png"
 
-4. Usage evaluate.py
+4. Usage ep.evaluate
 	This program can assess the algorithm results based on provided ground truth.
 	Input:
 		Input images (optional) - folder with imagery that both ground truth and algorithm results correspond to.
@@ -105,22 +106,22 @@ sudo pip install imageio
 		- Long tracking details
 			
 	Abstract syntax:
-		evaluate.py TestSetDir GroundTruthDir GroundTruthSegmentationPrefix GroundTruthTrackingPrefix AlgoDir AlgoNameInPlots AlgoSegmentaionPrefix AlgoTrackingPrefix [/Input InputImageryDir InputImageryPrefix]
+		python -m ep.evaluate TestSetDir GroundTruthDir GroundTruthSegmentationPrefix GroundTruthTrackingPrefix AlgoDir AlgoNameInPlots AlgoSegmentaionPrefix AlgoTrackingPrefix [/Input InputImageryDir InputImageryPrefix]
 	
 	Additional usage options are described in part 7.
 	
 	Usage examples:
 		Simple case:
-			evaluate.py TestSet1 "GroundTruth" "gt_seg" "gt_track" CellProfiler "Algo1" "cp_seg" "cp_track" 
+			python -m ep.evaluate TestSet1 "GroundTruth" "gt_seg" "gt_track" CellProfiler "Algo1" "cp_seg" "cp_track"
 		
 		If we want to test only segmentation:
-			evaluate.py TestSet1 "GroundTruth" "gt_seg" NONE CellProfiler "Algo1" "cp_seg" NONE
+			python -m ep.evaluate TestSet1 "GroundTruth" "gt_seg" NONE CellProfiler "Algo1" "cp_seg" NONE
 			
 		If we want addtional details plotting:
-			evaluate.py TestSet1 "GroundTruth" "gt_seg" "gt_track" CellProfiler "Algo1" "cp_seg" "cp_track" /Input "RawData" "bf"
+			python -m ep.evaluate TestSet1 "GroundTruth" "gt_seg" "gt_track" CellProfiler "Algo1" "cp_seg" "cp_track" /Input "RawData" "bf"
 	
-5. Usage compare.py
-	Compares the selected results. Requires results produced by evaluate.py. Make sure that all the algorithms to compare provide results for the same set of frames.
+5. Usage ep.compare
+	Compares the selected results. Requires results produced by python -m ep.evaluate. Make sure that all the algorithms to compare provide results for the same set of frames.
 	Input:
 		Test set folder
 		List of folder paths to the results (relative to Test set folder)
@@ -132,14 +133,14 @@ sudo pip install imageio
 		Report file in CSV format with tabular summary of F values for all algorithms
 		
 	Example:
-		compare.py TestSet1 Algo1 Algo2
+		python -m ep.compare TestSet1 Algo1 Algo2
 		
 6. Plots customisation
 	By default all the plots are generated as PNG files but there is an option to use vector format namely SVG. In order to do so open evaluation.ini file and set parameter "terminal" to "svg". However this option does not support merging plots to tiles.
 	
 	Gnuplot is used to plot the results so it is possible to modify the look of them by changing gnuplot scripts files: segmentation.plt, tracking.plt.
 		
-7. Additional options and informations about evaluate.py
+7. Additional options and informations about ep.evaluate
 	Apart from the basic use the evalutation platform can work with a couple of different formats.
 	
 	Two more formats of ground truth/algorithm results. In case of the algorithm results files Cell_colour column is not present:
@@ -159,7 +160,7 @@ sudo pip install imageio
 						<frame_number>, <cell_number>, <unique_cell_number>
 						
 			Usage example:
-				evaluate.py TestSet1 "GroundTruth" "GroundTruthCentersSeg.csv" "GroundTruthCentersTracking.csv" CellProfiler "Algo1" "CellProfilerResultsSeg.csv"  "CellProfilerResultsTracking.csv" 
+				python -m ep.evaluate TestSet1 "GroundTruth" "GroundTruthCentersSeg.csv" "GroundTruthCentersTracking.csv" CellProfiler "Algo1" "CellProfilerResultsSeg.csv"  "CellProfilerResultsTracking.csv"
 			
 		+ One file per data (as above but segmentation and tracking merged in one file):
 			Segmentation and tracking file (e.g. gt.txt) 
@@ -169,15 +170,15 @@ sudo pip install imageio
 					<frame_number>, <cell_number>, <cell_colour>, <center_position_x>, <center_position_y>, <unique_cell_number>
 			
 			Usage example:
-				evaluate.py TestSet1 /S "GroundTruth" "GroundTruthCenters.csv" CellProfiler /S  "Algo1" "CellProfilerResults.csv"  
+				python -m ep.evaluate TestSet1 /S "GroundTruth" "GroundTruthCenters.csv" CellProfiler /S  "Algo1" "CellProfilerResults.csv"
 			
 	Remarks (for advanced users):
-		plot_comparison.py which is run by evaluate.py uses one merged file both for GT and algorithm results so this script merges selected files. First merges many files and adds frame numbers, then if two files exist (segmentation and tracking) merges them into one. 
+		plot_comparison.py which is run by evaluate.py uses one merged file both for GT and algorithm results so this script merges selected files. First merges many files and adds frame numbers, then if two files exist (segmentation and tracking) merges them into one.
 		
 		There exist an additional switch /Parser to specify mnemonic for parser used to parse these resulting data. Parsers are implemented in parsers.py and its mnemonics are defined in plot_comparison.py. 
 		
 		For example:
-			evaluate.py TestSet1 /S "GroundTruth" "gt" CellProfiler /Parser CP /S "Algo1" "res" 
+			python -m ep.evaluate TestSet1 /S "GroundTruth" "gt" CellProfiler /Parser CP /S "Algo1" "res"
 			
 			uses specific "CP" parser for CellProfiler data.
 			

@@ -1,0 +1,29 @@
+===========
+CHANGE LOG:
+===========
+
+`1.10`
+-------------------------
+* partial python 3 compatibility
+* additional 'better' formatted report
+* png are now loaded for evaluation details
+
+`1.01` 
+-------------------------
+* compatible with Ubuntu
+* universal endline handling
+* minor bugs
+
+`1.00`
+-------------------------
+* errors tracking (in csv and png)
+* long term tracking
+* should work with both ; and ,
+* major refactor
+* bug fixes
+* minor bug fixes
+* summary to std
+* report.csv of F values
+* segmentation and tracking evaluation details go to file
+* visualisation of the evaluation on input images (segmentation, tracking, long tracking)
+* long-term tracking evaluation
