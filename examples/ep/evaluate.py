@@ -1,12 +1,14 @@
+#!/usr/bin/env python2
 import sys
 import os
 import re
 import shutil
 import stat
 
-from evalplatform.utils import *
-import evalplatform.plot_comparison as evaluate
-from evalplatform.utils import debug_center
+from ep.evalplatform.parsers_image import ImageCellParser
+from ep.evalplatform.utils import *
+import ep.evalplatform.plot_comparison as evaluate
+from ep.evalplatform.utils import debug_center
 
 TMP_SUFFIX = ".tmp" # every added intermediate file has tmp suffix in the name, such files are omitted in case of evaluation.
 DEFAULT_PARSER = "PLATFORM_DEF"
@@ -30,9 +32,9 @@ def find_all_created_directories(folder):
     return [os.path.join(folder,d) for d in directories]
     
 def get_trailing_number(text):
-        reversed = text[::-1]
-        m = re.search("\D", reversed)
-        return int(reversed[:m.start()][::-1])
+    reversed = text[::-1]
+    m = re.search("\D", reversed + " ")
+    return int(reversed[:m.start()][::-1])
         
 def determine_all_snaptimes(file_names):
     """Return list of times."""
@@ -74,9 +76,12 @@ def merge_seg_track_files(folder,files):
 def merge_files_into_one(times, folder, files):
     """Merge many files into one, add tmp suffix if not already there."""
     def add_file(write_file,new_file_path,time):
-        new_file = open(new_file_path,"rU")
-        data = new_file.readlines()[1:]
-        new_file.close()
+        if ImageCellParser.is_image(new_file_path):
+            data = [new_file_path]
+        else:
+            new_file = open(new_file_path,"rU")
+            data = new_file.readlines()[1:]
+            new_file.close()
         
         with_frame_number = [",".join([str(time)] + [line.strip() + "\n"]) for line in data]
         write_file.writelines(with_frame_number)
@@ -86,11 +91,16 @@ def merge_files_into_one(times, folder, files):
     output_name = files[0] + ".merged"
     if TMP_SUFFIX not in output_name:
         output_name += TMP_SUFFIX
-    
+
+
     # Read header
-    first_file = open(os.path.join(folder,files[0]),"rU")
-    header = first_file.readlines()[0]
-    first_file.close()
+    first_file_path = os.path.join(folder,files[0])
+    if ImageCellParser.is_image(first_file_path):
+        header = "Filepath\n"
+    else:
+        first_file = open(first_file_path,"rU")
+        header = first_file.readlines()[0]
+        first_file.close()
     
     write_file = open(os.path.join(folder,output_name),"w")
     write_file.writelines("Frame_number, " + header) 
@@ -113,7 +123,8 @@ def parse_data(args, parent_folder):
         seg_name = args[1]
         track_name = args[2]
         return (args[3:],(folder,seg_name,track_name))
-        
+
+
 
 if __name__ == '__main__':
     debug_center.configure(CONFIG_FILE)

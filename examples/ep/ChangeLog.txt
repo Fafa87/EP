@@ -1,6 +1,12 @@
 EVALUATION TOOL FOR CELL SEGMENTATION AND TRACKING
 CHANGE LOG:
 
+Up to 1.10:
+- partial python 3 compatibility
+- additional 'better' formatted report
+- png are now loaded for evaluation details
+- 
+
 Up to 1.01:
 - compatible with Ubuntu
 - universal endline handling

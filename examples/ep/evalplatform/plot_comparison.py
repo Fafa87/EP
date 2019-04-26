@@ -3,23 +3,26 @@ import sys
 import os
 from itertools import *
 
-from utils import*
-from parsers import*
-from yeast_datatypes import CellOccurence
-import draw_details
+from ep.evalplatform.utils import*
+from ep.evalplatform.parsers import*
+from ep.evalplatform.parsers_image import*
+from ep.evalplatform.yeast_datatypes import CellOccurence
+from ep.evalplatform import draw_details
 
 SEGMENTATION_GNUPLOT_FILE = "plot_segmentation.plt"
 TRACKING_GNUPLOT_FILE = "plot_tracking.plt"
 
 parsers = [DefaultPlatformParser(), OldGroundTruthParser(), CellProfilerParser(), CellProfilerParserTracking(), CellTracerParser(), CellIDParser(), TrackerParser(), CellSerpentParser(), CellStarParser(), 
-CellProfilerParserTrackingOLDTS2()
+CellProfilerParserTrackingOLDTS2(), LabelImageParser(), MaskImageParser([2,3])
 ]
 input_type =  dict([(p.symbol,p) for p in parsers])
 
 ground_truth_parser = OldGroundTruthParser()
 
 # Max match distance. Read from: evaluation.ini at program folder then use this default.
-cutoff = 30 # pixels
+loaded_ini = False
+cutoff = 30  # pixels
+cutoff_iou = 0.3  # intersection / union
 output_evaluation_details = 0
 draw_evaluation_details = 0
 
@@ -31,7 +34,7 @@ def filter_border(celllist):
     elif(len(celllist[0]) == 2):
         return [(cell_A, cell_B) for (cell_A, cell_B) in celllist if not cell_A.obligatory() or not cell_B.obligatory()] 
     else:
-        print celllist
+        print (celllist)
     
 def read_ground_truth(path):
     """
@@ -40,11 +43,8 @@ def read_ground_truth(path):
     """
     debug_center.show_in_console(None,"Progress","Reading ground truth data...")
     debug_center.show_in_console(None,"Tech","".join(["Uses ", ground_truth_parser.__class__.__name__, " parser..."]))
-    data_file = open(path,"rU")
-    lines = data_file.readlines()
     parser = ground_truth_parser
-    cells = parser.parse(lines)
-    data_file.close()
+    cells = parser.load_from_file(path)
     debug_center.show_in_console(None,"Progress","Done reading ground truth data...")
     return cells
 
@@ -59,11 +59,8 @@ def read_results(path, parser, name):
     """
     debug_center.show_in_console(None,"Progress","".join(["Reading ", name, " results data..."]))
     debug_center.show_in_console(None,"Tech","".join(["Uses ", parser.__class__.__name__, " parser..."]))
-    data_file = open(path,"rU")
-    lines = data_file.readlines()
-    cells = parser.parse(lines)
+    cells = parser.load_from_file(path)
     make_all_cells_important(cells) # cells cannot use colour temporary
-    data_file.close()
     debug_center.show_in_console(None,"Progress","".join(["Done reading ", name, " result data..."]))
     return (name,cells)
 
@@ -92,7 +89,8 @@ def write_to_file_printable(details, path):
     else:
         write_to_csv(["No details!"],[],path)
 
-def format_prF(title, (precision,recall,F)):
+def format_prF(title, params):
+    (precision, recall, F) = params
     return [title,"Precision: " + str(precision), "Recall: " + str(recall), "F: " + str(F)]
 
 def format_summary(algorithm, segmentation,tracking,long_tracking):
@@ -120,13 +118,12 @@ def find_correspondence(ground_truth, results):
     Matching:
     [(ground_truth_cell, results_cell)]  -> can easily calculate false positives/negatives and cell count + tracking
     """
-
-    edges = [(distance(g,r),(g,r)) for g in ground_truth for r in results if distance(g,r) < cutoff]
+    edges = [(g.similarity(r),(g,r)) for g in ground_truth for r in results if g.is_similar(r, cutoff, cutoff_iou)]
     correspondences = []
     matchedGT = set([])
     matchedRes = set([])
 
-    for (d,(a,b)) in sorted(edges):
+    for (d,(a,b)) in sorted(edges, key=lambda x: -x[0]):
         if not b in matchedRes:
             if not a in matchedGT:
                 correspondences.append((a,b))
@@ -164,33 +161,37 @@ def calculate_precision_recall_F_metrics(algorithm_number, real_number, correct_
     if algorithm_number == 0:  
         precision = 0
     else:
-        precision =  correct_number/algorithm_number
+        precision = float(correct_number)/algorithm_number
     if real_number == correct_number: # 0 / 0
         recall = 1
     else:
-        recall = correct_number/real_number
-    return (precision, recall, 2*correct_number/(real_number+algorithm_number))   #precision*recall/(precision+recall))
+        recall = float(correct_number)/real_number
+    return (precision, recall, 2*float(correct_number)/(real_number+algorithm_number))   #precision*recall/(precision+recall))
 
-def calculate_metrics_segmentation((cell_count_results, cell_count_ground_truth, correspondences, false_positives, false_negatives)):
+def calculate_metrics_segmentation(params):
     """
     Input: (cell_count_results, cell_count_ground_truth, correspondences, false_positives, false_negatives)
     Result: (cell_count_results/cell_count_ground_truth, precision, recall, F)
     """
+    (cell_count_results, cell_count_ground_truth, correspondences, false_positives, false_negatives) = params
     prf = calculate_precision_recall_F_metrics(cell_count_results, cell_count_ground_truth, correspondences)
-    return tuple([cell_count_results/cell_count_ground_truth]) + prf
+    return tuple([float(cell_count_results)/cell_count_ground_truth]) + prf
 
-def calculate_stats_tracking((last_gt,last_res),last_mapping,(new_gt,new_res),new_mapping):
+def calculate_stats_tracking(params_last,last_mapping,params_new,new_mapping):
     """
     (found_links, real_links, correct_links, false_positive, false_negative)
     1 to 1 correspondence version
     """
+    (last_gt, last_res) = params_last
+    (new_gt, new_res) = params_new
+
     # ignore non obligatory GT cells
     last_gt = [c for c in last_gt if c.obligatory()]
     new_gt = [c for c in new_gt if c.obligatory()]
 
     # leaves only cell from results the ones matched with the obligatory cells or not matched at all
-    last_res = [c for c in last_res if (last_mapping == [] or (c not in zip(*last_mapping)[1])) or (zip(*last_mapping)[0][zip(*last_mapping)[1].index(c)].obligatory())] # searches in [(a,b)] for the a when given b.  
-    new_res = [c for c in new_res if (new_mapping == [] or (c not in zip(*new_mapping)[1])) or (zip(*new_mapping)[0][zip(*new_mapping)[1].index(c)].obligatory())]
+    last_res = [c for c in last_res if (last_mapping == [] or (c not in list(zip(*last_mapping))[1])) or (list(zip(*last_mapping))[0][list(zip(*last_mapping))[1].index(c)].obligatory())] # searches in [(a,b)] for the a when given b.
+    new_res = [c for c in new_res if (new_mapping == [] or (c not in list(zip(*new_mapping))[1])) or (list(zip(*new_mapping))[0][list(zip(*new_mapping))[1].index(c)].obligatory())]
 
     # ignore mapping connected to the non-obligatory GT cells 
     last_mapping = [(gt,res) for (gt,res) in last_mapping if gt.obligatory()]
@@ -206,23 +207,34 @@ def calculate_stats_tracking((last_gt,last_res),last_mapping,(new_gt,new_res),ne
     found_links = [TrackingLink(last,new) for last in last_res for new in new_res if last.unique_id==new.unique_id]
 
     correct_results = [TrackingResult(link_gt,link_res) for (link_res,link_gt) in correct_links]
-    false_negatives = [TrackingResult(gt,None) for gt in real_links if correct_links == [] or gt not in zip(*correct_links)[1]]
-    false_positives = [TrackingResult(None,res) for res in found_links if correct_links == [] or res not in zip(*correct_links)[0]]
+    false_negatives = [TrackingResult(gt,None) for gt in real_links if correct_links == [] or gt not in list(zip(*correct_links))[1]]
+    false_positives = [TrackingResult(None,res) for res in found_links if correct_links == [] or res not in list(zip(*correct_links))[0]]
     
     return (found_links, real_links, correct_results, false_positives, false_negatives) # evaluation_details
 
+
+def load_general_ini(path):
+    global cutoff, cutoff_iou, draw_evaluation_details, ignored_frame_size, loaded_ini
+    loaded_ini = True
+    if read_ini(path, 'evaluation', 'maxmatchdistance') != '':
+        cutoff = float(read_ini(path, 'evaluation', 'maxmatchdistance'))
+    if read_ini(path, 'evaluation', 'miniousimilarity') != '':
+        cutoff_iou = float(read_ini(path, 'evaluation', 'miniousimilarity'))
+    if read_ini(path, 'evaluation', 'drawevaluationdetails') != '':
+        draw_evaluation_details = float(read_ini(path, 'evaluation', 'drawevaluationdetails'))
+    if read_ini(path, 'evaluation', 'ignoredframesize') != '':
+        ignored_frame_size = float(read_ini(path, 'evaluation', 'ignoredframesize'))
+
+
 def run_script(args):
-    global input_type,ground_truth_parser,cutoff,draw_evaluation_details
+    global ground_truth_parser, output_evaluation_details
 
     if(len(args) < 4):
         print("".join(["Parameters: \n<ground_truth_csv_file> {/SegOnly} {<ground_truth_type>} <algorithm_results_csv_file> <algorithm_results_type> [algorithm_name] [ground_truth_seg_csv_file]" ]))
-    else: 
-        if read_ini(CONFIG_FILE,'evaluation','maxmatchdistance') != '':
-            cutoff = float(read_ini(CONFIG_FILE,'evaluation','maxmatchdistance'))
+    else:
+        load_general_ini(CONFIG_FILE)
         if read_ini(CONFIG_FILE,'evaluation','outputevaluationdetails') != '':
             output_evaluation_details = float(read_ini(CONFIG_FILE,'evaluation','outputevaluationdetails'))
-        if read_ini(CONFIG_FILE,'evaluation','drawevaluationdetails') != '':
-            draw_evaluation_details = float(read_ini(CONFIG_FILE,'evaluation','drawevaluationdetails'))
         if read_ini(CONFIG_FILE,'plot','terminal') != '':
             terminal_type = read_ini(CONFIG_FILE,'plot','terminal').strip()    
         
@@ -253,7 +265,7 @@ def run_script(args):
         algorithm_results_csv_file = args[2]
         algorithm_results_type = args[3]
 
-        if(not input_type.has_key(algorithm_results_type)):
+        if algorithm_results_type not in input_type:
             debug_center.show_in_console(None,"Error","ERROR: " + algorithm_results_type + " is not supported. There are supported types: " + str(input_type))
             sys.exit()
         else:

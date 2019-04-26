@@ -1,8 +1,12 @@
 import itertools
-import StringIO
 import csv
 
-from yeast_datatypes import*
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+from ep.evalplatform.yeast_datatypes import*
 
 ### ======= CELLPARSER HIERARCHY ======= ###
 
@@ -44,7 +48,7 @@ class CSVCellParser():
         return True #all([h is not number for h in headers])
     
     def csv_line(self, data):
-        line = StringIO.StringIO()
+        line = StringIO()
         cw = csv.writer(line)
         cw.writerow(data)
         return line.getvalue().strip()
@@ -55,7 +59,13 @@ class CSVCellParser():
         else:
             data_split = list(csv.reader([line]))[0]
         return [col.replace(",",".").strip() for col in data_split]
-    
+
+    def load_from_file(self, path):
+        with open(path, "rU") as data_file:
+            lines = data_file.readlines()
+            cells = self.parse(lines)
+        return cells
+
     def set_line(self,line):
         self.columns = self.csv_split(line)
     
@@ -84,7 +94,7 @@ class CSVCellParser():
             try:
                 self.csv_dialect = csv.Sniffer().sniff(headers,[',',';'])
             except csv.Error:
-                print "CSV delimiter could not be established from file headers. Defaults are used."
+                print ("CSV delimiter could not be established from file headers. Defaults are used.")
 
 class CellProfilerParser(CSVCellParser):
     symbol = "CP"
@@ -185,8 +195,8 @@ class DefaultPlatformParser(CSVCellParser):
         header_list = [h.lower().strip() for h in self.csv_split(headers)]
         if any([h not in self.possible_headers for h in header_list]) or any([h not in header_list for h in self.required_headers_list]):
             # CSV file headers are not consistent with expected ones. Use default option.
-            print "File header does not comply with the expected headers list. The default setting are used instead."
-            print "Provided headers: ", header_list
+            print ("File header does not comply with the expected headers list. The default setting are used instead.")
+            print ("Provided headers: ", header_list)
             if "Cell_colour" in headers :
                 if "Unique_cell_number" in headers:
                     self.map_name = self.map_colour_name_segtrack
@@ -197,7 +207,7 @@ class DefaultPlatformParser(CSVCellParser):
                     self.map_name = self.map_regular_name_segrack
                 else:
                     self.map_name = self.map_regular_name_segonly
-            print "Used mapping: ", self.map_name
+            print ("Used mapping: ", self.map_name)
         else:
             self.map_name = dict([(self.header_to_csvcellparser[h.strip()],i) for i,h in enumerate(header_list)])
         

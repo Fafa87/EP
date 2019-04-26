@@ -1,9 +1,10 @@
+#!/usr/bin/env python2
 import sys
 import os
-from evalplatform.utils import *
-import evalplatform.gather_results as comparison
-from evalplatform.utils import debug_center
-import evaluate
+from ep.evalplatform.utils import *
+import ep.evalplatform.gather_results as comparison
+from ep.evalplatform.utils import debug_center
+import ep.evaluate
 
 def find_eval(folder):
     if not os.path.isdir(folder):
@@ -33,7 +34,7 @@ else:
     debug_center.configure(CONFIG_FILE)
     algorithm_number = len(sys.argv)-2
     
-    results_folder = os.path.join(evaluate.OUTPUT_FOLDER,sys.argv[1])
+    results_folder = os.path.join(ep.evaluate.OUTPUT_FOLDER,sys.argv[1])
     algorithm_results = []
     for i in range(algorithm_number):
         algorithm_results.append(sys.argv[i+2])
