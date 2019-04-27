@@ -27,6 +27,8 @@ setuptools.setup(
             "License :: OSI Approved :: BSD License",
             "Operating System :: OS Independent",
             "Programming Language :: Python :: 2.7",
+            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.7",
             "Topic :: Scientific/Engineering"
         ],
         cmdclass={
@@ -45,5 +47,5 @@ setuptools.setup(
             "pytest"
         ],
         url="https://github.com/Fafa87/EP",
-        version="1.0.1"
+        version="1.1.0"
 )
