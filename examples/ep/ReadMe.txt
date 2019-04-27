@@ -26,17 +26,18 @@ sudo pip install imageio
 	Comparison
 	    ---> ep
             ---> evalplatform
-            ---> TestSet1
-                 ---> GroundTruth
-                 ---> RawData (optionally to show evaluation details)
-                 ---> Algo1
-                 ---> Algo2
             ---> compare.py
             ---> evaluate.py
+        ---> TestSet1
+             ---> GroundTruth
+             ---> RawData (optionally to show evaluation details)
+             ---> Algo1
+             ---> Algo2
 	
 3. Configuration 
 	There is evaluation.ini file which contains:
 	- maximal distance (in pixels) between cell in algorithm results and cell in ground truth so it can be considered a match. This parameter depends on the resolution of your images and average cell sizes. We recomend to use a value corresponding to the max  cell size in pixels present in your images.
+    - minimal iou similarity is a threshold on how similar have to be contours (when using LABEL or MASK image parser) for two object to be considered a match
 	- outputevaluationdetails decides whether to produce detailed results (every correct, false positive, false negative is registered).
 	- drawevaluationdetails decides whether to draw the above details upon the provided input images.
 	- cleartmp a switch deciding whether to remove all temporary files after evaluation.
@@ -44,7 +45,7 @@ sudo pip install imageio
 		Values are: 1 (Errors), 2 (+Warnings), 3 (+Informations), 3.1 (+Evaluation progress), 3.2 (+platform technicalities)
 	- terminal is the output plots format, supported values are "svg" and "png"
 
-4. Usage ep.evaluate
+4. Usage ep.evaluate with cell centers formats 
 	This program can assess the algorithm results based on provided ground truth.
 	Input:
 		Input images (optional) - folder with imagery that both ground truth and algorithm results correspond to.
@@ -117,10 +118,39 @@ sudo pip install imageio
 		If we want to test only segmentation:
 			python -m ep.evaluate TestSet1 "GroundTruth" "gt_seg" NONE CellProfiler "Algo1" "cp_seg" NONE
 			
-		If we want addtional details plotting:
+		If we want additional details plotting:
 			python -m ep.evaluate TestSet1 "GroundTruth" "gt_seg" "gt_track" CellProfiler "Algo1" "cp_seg" "cp_track" /Input "RawData" "bf"
+
+4. Usage ep.evaluate with full contour formats 
+	This program can assess the algorithm results based on ground truth provided in form of labels. 
+    The advantage is that we can take object contour into account and reject matches where center is correct but contours are significantly different.
+	Input:
+		Input images (optional) - folder with imagery that both ground truth and algorithm results correspond to.
+		
+		GroundTruth - folder with ground truth files (one file one per frame): 
+			Segmentation ground truth files (e.g. time001.tif, time002.tif) - files containing given substring
+                Each cell should be marked with different positive pixel value.
+		
+		Algorithm name - user friendly algorithm name
+		
+		Algorithm Results - folder with algorithm results file (same as in case of GroundTruth - one file per one frame) 
+			Segmentation algorithm results files (e.g. seg_time001.txt, seg_time002.txt) - files containing given substring
+                Each cell should be marked with different positive pixel value.
+						
+	Output:
+        Same as in case of cell center formats with additional information about the IOU between correctly matched cells.
+        
+	Abstract syntax:
+		python -m ep.evaluate TestSetDir /Parser LABEL GroundTruthDir GroundTruthSegmentationPrefix NONE AlgoDir /Parser LABEL AlgoNameInPlots AlgoSegmentaionPrefix NONE [/Input InputImageryDir InputImageryPrefix]
 	
-5. Usage ep.compare
+	Usage examples:
+		Case with additional details plotting:
+			python -m ep.evaluate Various_LabelsBased /Parser LABEL "GroundTruth" time NONE Segmenter /Parser LABEL "Segmenter" "time" NONE /Input RawData time
+		
+		Segmentation given as masks:
+			python -m ep.evaluate Various_MasksBased /Parser MASK "GroundTruth" time NONE Segmenter /Parser MASK "Segmenter" "time" NONE /Input RawData time
+   
+6. Usage ep.compare
 	Compares the selected results. Requires results produced by python -m ep.evaluate. Make sure that all the algorithms to compare provide results for the same set of frames.
 	Input:
 		Test set folder
@@ -135,12 +165,12 @@ sudo pip install imageio
 	Example:
 		python -m ep.compare TestSet1 Algo1 Algo2
 		
-6. Plots customisation
+7. Plots customisation
 	By default all the plots are generated as PNG files but there is an option to use vector format namely SVG. In order to do so open evaluation.ini file and set parameter "terminal" to "svg". However this option does not support merging plots to tiles.
 	
 	Gnuplot is used to plot the results so it is possible to modify the look of them by changing gnuplot scripts files: segmentation.plt, tracking.plt.
 		
-7. Additional options and informations about ep.evaluate
+8. Additional options and informations about ep.evaluate
 	Apart from the basic use the evalutation platform can work with a couple of different formats.
 	
 	Two more formats of ground truth/algorithm results. In case of the algorithm results files Cell_colour column is not present:
@@ -182,6 +212,6 @@ sudo pip install imageio
 			
 			uses specific "CP" parser for CellProfiler data.
 			
-8. Help.
+9. Help.
 	If you still have questions or problems with Evaluation platform please do not hesitate and contact us - will be glad to help.
 	

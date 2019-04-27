@@ -4,9 +4,13 @@ CHANGE LOG:
 
 `1.10`
 -------------------------
-* partial python 3 compatibility
+* python 3 compatibility
+* proper CI setup
 * additional 'better' formatted report
 * png are now loaded for evaluation details
+* label or masked images can now be used in evaluation:
+    * threshold IOU to accept match defined in INI
+    * IOU between matched objects saved in evaluation details
 
 `1.01` 
 -------------------------
