@@ -47,27 +47,51 @@ class TestSlices(unittest.TestCase):
 
 class TestPathManipulation(unittest.TestCase):
     def test_split_path(self):
-        components = split_path(os.path.join("C:\\", "program files", "test"))
-        self.assertEqual(components, ["C:\\", "program files", "test"])
+        if os.name == 'nt':
+            components = split_path(r"C:\program files\test")
+            self.assertEqual(components, ["C:\\", "program files", "test"])
 
-        components = split_path(r"program files/test/")
-        self.assertEqual(components, ["program files", "test", ""])
+            components = split_path(r"program files\test\\")
+            self.assertEqual(components, ["program files", "test", ""])
+
+        else:
+            components = split_path(r"home/program files/test")
+            self.assertEqual(components, ["home", "program files", "test"])
+
+            components = split_path(r"program files/test/")
+            self.assertEqual(components, ["program files", "test", ""])
 
     def test_determine_output_path(self):
-        file_path = r"TestSet1\Results\Mine\res.png"
-        output_path = "Output"
-        result = determine_output_filepath(file_path, output_path)
-        self.assertEqual(result, os.path.join(output_path, file_path))
+        if os.name == 'nt':
+            file_path = r"TestSet1\Results\Mine\res.png"
+            output_path = "Output"
+            result = determine_output_filepath(file_path, output_path)
+            self.assertEqual(result, os.path.join(output_path, file_path))
 
-        file_path = r"c:\TestSet1\Results\Mine\res.png"
-        output_path = "Output"
-        result = determine_output_filepath(file_path, output_path)
-        self.assertEqual(result, os.path.join("c:\\", "TestSet1", "Results", "Mine", "Output", "res.png"))
+            file_path = r"c:\TestSet1\Results\Mine\res.png"
+            output_path = "Output"
+            result = determine_output_filepath(file_path, output_path)
+            self.assertEqual(result, r"c:\TestSet1\Results\Mine\Output\res.png")
 
-        file_path = r"c:\TestSet1\Results\Mine\res.png"
-        output_path = "d:\Output"
-        result = determine_output_filepath(file_path, output_path)
-        self.assertEqual(result, os.path.join("d:\\", "Output", "Mine", "res.png"))
+            file_path = r"c:\TestSet1\Results\Mine\res.png"
+            output_path = r"d:\Output"
+            result = determine_output_filepath(file_path, output_path)
+            self.assertEqual(result, r"d:\Output\Mine\res.png")
+        else:
+            file_path = "TestSet1/Results/Mine/res.png"
+            output_path = "Output"
+            result = determine_output_filepath(file_path, output_path)
+            self.assertEqual(result, os.path.join(output_path, file_path))
+
+            file_path = "/home/TestSet1/Results/Mine/res.png"
+            output_path = "Output"
+            result = determine_output_filepath(file_path, output_path)
+            self.assertEqual(result, "home/TestSet1/Results/Mine/Output/res.png")
+
+            file_path = "/home/TestSet1/Results/Mine/res.png"
+            output_path = "/home/Output"
+            result = determine_output_filepath(file_path, output_path)
+            self.assertEqual(result, "home/Output/Mine/res.png")
 
 
 class TestINI(unittest.TestCase):
