@@ -86,12 +86,12 @@ class TestPathManipulation(unittest.TestCase):
             file_path = "/home/TestSet1/Results/Mine/res.png"
             output_path = "Output"
             result = determine_output_filepath(file_path, output_path)
-            self.assertEqual(result, "home/TestSet1/Results/Mine/Output/res.png")
+            self.assertEqual(result, "/home/TestSet1/Results/Mine/Output/res.png")
 
             file_path = "/home/TestSet1/Results/Mine/res.png"
             output_path = "/home/Output"
             result = determine_output_filepath(file_path, output_path)
-            self.assertEqual(result, "home/Output/Mine/res.png")
+            self.assertEqual(result, "/home/Output/Mine/res.png")
 
 
 class TestINI(unittest.TestCase):
