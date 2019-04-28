@@ -5,3 +5,13 @@ __pycache__/
 examples/Output
 examples/Output_2_7
 examples/Output_3_7
+
+\.eggs/
+
+build/
+
+dist/
+
+Evaluation_Platform\.egg-info/
+
+evalplatform\.egg-info/

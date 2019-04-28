@@ -38,8 +38,8 @@ setuptools.setup(
         keywords=["evaluation","precision","recall"],
         license="BSD",
         long_description="",
-        name="Evaluation Platform",
-        description="",
+        name="evalplatform",
+        description="Evaluation Platform",
         packages=setuptools.find_packages(exclude=[
             "tests", "examples"
         ]),
