@@ -11,7 +11,10 @@ class CellOccurence:
         colour = 0 - cell
         colour != 0 - maybe cell
         """
-        self.frame_number = frame_number
+        if isinstance(frame_number, str):
+            frame_number = frame_number.lstrip('0')
+
+        self.frame_number = str(frame_number)
         self.cell_id = cell_id
         self.unique_id = unique_id
         self.position = position

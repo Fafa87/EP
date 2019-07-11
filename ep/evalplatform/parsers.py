@@ -87,7 +87,7 @@ class CSVCellParser():
         cell = CellOccurence(int(self.get_column("frame_nr")),int(self.get_column("cell_nr")),self.unique_id(line),
             (float(self.get_column("position_x")), float(self.get_column("position_y"))))
         cell.colour = self.cell_colour(line)
-        return (int(self.get_column("frame_nr")), cell)
+        return cell.frame_number, cell
     
     def configure(self,headers):
         if len(headers.strip()) > 0:
@@ -228,7 +228,7 @@ class DefaultPlatformParser(CSVCellParser):
         cell = CellOccurence(int(self.get_column("frame_nr")),int(self.get_column("cell_nr")),self.unique_id(line),
             (float(self.get_column("position_x")), float(self.get_column("position_y"))))
         cell.colour = self.cell_colour(line)
-        return (int(self.get_column("frame_nr")), cell)
+        return cell.frame_number, cell
     
     def output(self, cells, output_colors = False):
         """
