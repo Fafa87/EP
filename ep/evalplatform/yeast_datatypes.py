@@ -123,7 +123,7 @@ class EvaluationDetail(object):
 
     def __init__(self, frame, result):
         self.result = result
-        self.frame = frame
+        self.frame = parse_file_order(frame)
 
     def __str__(self):
         return "{0} - {1}".format(self.frame, EvaluationResult.reverse_mapping[self.result])
@@ -147,7 +147,7 @@ class EvaluationDetail(object):
         return [self.frame, EvaluationResult.reverse_mapping[self.result]]
 
     def csv_read(self, record):
-        self.frame = record[0]
+        self.frame = parse_file_order(record[0])
         self.result = EvaluationResult.__getattribute__(EvaluationResult, record[1])
         return record[2:]
 
@@ -266,7 +266,7 @@ class TrackingResult(EvaluationDetail):
 
     def csv_read(self, record):
         record = EvaluationDetail.csv_read(self, record)
-        self.prev_frame = record[0]
+        self.prev_frame = parse_file_order(record[0])
         record = record[1:]
 
         def read_link(record, strip_record=False):
