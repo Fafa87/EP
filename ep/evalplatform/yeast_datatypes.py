@@ -147,7 +147,7 @@ class EvaluationDetail(object):
         return [self.frame, EvaluationResult.reverse_mapping[self.result]]
 
     def csv_read(self, record):
-        self.frame = int(record[0])
+        self.frame = record[0]
         self.result = EvaluationResult.__getattribute__(EvaluationResult, record[1])
         return record[2:]
 

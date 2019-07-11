@@ -206,7 +206,7 @@ def get_trailing_number(filepath):
     filename = os.path.splitext(filepath)[0]
     reversed_name = filename[::-1]
     m = re.search("\D", reversed_name + " ")
-    return int(reversed_name[:m.start()][::-1])
+    return reversed_name[:m.start()][::-1]
 
 
 def run(overlord, directory_images, directory_output, desired_output_file_prefix = None):

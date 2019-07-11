@@ -34,7 +34,7 @@ def find_all_created_directories(folder):
 def get_trailing_number(text):
     reversed = text[::-1]
     m = re.search("\D", reversed + " ")
-    return int(reversed[:m.start()][::-1])
+    return reversed[:m.start()][::-1]
         
 def determine_all_snaptimes(file_names):
     """Return list of times."""
@@ -106,7 +106,7 @@ def merge_files_into_one(times, folder, files):
     write_file.writelines("Frame_number, " + header) 
     for num,file in number_files:
         if num in times:
-            add_file(write_file,os.path.join(folder,file),times.index(num)+1)
+            add_file(write_file,os.path.join(folder,file),num)
 
     write_file.close()
     return output_name
