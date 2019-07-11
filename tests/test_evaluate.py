@@ -5,26 +5,15 @@ import imageio
 import numpy as np
 
 from ep import evaluate
+from tests.testbase import TestBase
 
 
-class TestEvalute(unittest.TestCase):
+class TestEvalute(TestBase):
     def setUp(self):
-        self.to_clear = []
+        super(TestEvalute, self).setUp()
         self.image_1 = np.zeros((10, 10), dtype=np.uint8)
         self.image_1[5:8, 8:11] = 1
         self.image_1[5, 7] = 2
-
-    def tearDown(self):
-        for path in self.to_clear:
-            os.remove(path)
-
-    def save_temp(self, path, image):
-        self.to_clear.append(path)
-        imageio.imsave(path, image)
-
-    def create_temp(self, path):
-        self.to_clear.append(path)
-        return open(path, "w")
 
     def test_merge_files_into_one_images(self):
         image1_path = "image1.tiff"
