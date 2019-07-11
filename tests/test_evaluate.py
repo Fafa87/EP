@@ -42,8 +42,8 @@ class TestEvalute(unittest.TestCase):
             self.assertEqual(4, len(lines))
             self.assertEqual("Frame_number, Filepath\n", lines[0])
             self.assertEqual("1," + image1_path, lines[1].strip())
-            self.assertEqual("2," + image2_path, lines[2].strip())
-            self.assertEqual("3," + image3_path, lines[3].strip())
+            self.assertEqual("3," + image2_path, lines[2].strip())
+            self.assertEqual("12," + image3_path, lines[3].strip())
 
     def test_merge_files_into_one_filter(self):
         image1_path = "image1.tiff"
@@ -61,7 +61,7 @@ class TestEvalute(unittest.TestCase):
             self.assertEqual(3, len(lines))
             self.assertEqual("Frame_number, Filepath\n", lines[0])
             self.assertEqual("1," + image1_path, lines[1].strip())
-            self.assertEqual("2," + image3_path, lines[2].strip())
+            self.assertEqual("12," + image3_path, lines[2].strip())
 
     def test_merge_files_into_one_csv(self):
         f1 = self.create_temp("f1")

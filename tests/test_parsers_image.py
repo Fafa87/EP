@@ -109,10 +109,9 @@ class TestCellImageParser(unittest.TestCase):
     def fake_load_single_image(self, called):
         def load_single_image(f, p):
             imageio.imread(p)
-            called.append((f, p))
-            fake = CellOccurence(0, 0, 0, None)
-            fake.frame_number = 0
+            fake = CellOccurence(f, 0, 0, None)
             fake.data = p
+            called.append((fake.frame_number, p))
             return [fake]
 
         return load_single_image
@@ -149,13 +148,13 @@ class TestCellImageParser(unittest.TestCase):
         self.save_temp(image2_path, self.image_2)
 
         res = self.parser.load_from_file(image1_path)
-        self.assertEqual(0, res[0][0])
+        self.assertEqual(1, res[0][0])
         self.assertEqual(image1_path, res[0][1].data)
         self.assertEqual([(1, image1_path)], called)
 
         called[:] = []
         res = self.parser.load_from_file(image2_path)
-        self.assertEqual(0, res[0][0])
+        self.assertEqual(1, res[0][0])
         self.assertEqual(image2_path, res[0][1].data)
         self.assertEqual([(1, image2_path)], called)
 
@@ -172,8 +171,8 @@ class TestCellImageParser(unittest.TestCase):
         self.prepare_merged(merged_path, [image1_path, image2_path])
 
         res = self.parser.load_from_file(merged_path)
-        self.assertEqual(0, res[0][0])
-        self.assertEqual(0, res[1][0])
+        self.assertEqual(1, res[0][0])
+        self.assertEqual(2, res[1][0])
         self.assertEqual(image1_path, res[0][1].data)
         self.assertEqual(image2_path, res[1][1].data)
         self.assertEqual([(1, image1_path), (2, image2_path)], called)

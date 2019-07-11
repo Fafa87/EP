@@ -149,10 +149,10 @@ def parse_file_order(order_object):
             order_normalized = order_object
     elif isinstance(order_object, int):
         order_normalized = int(order_object)
-    else
+    else:
         raise Exception("Order is neither str nor int: " + str(order_object))
 
-    return str(order_normalized)
+    return order_normalized
 
 
 def package_path(filename, quoted=1):
