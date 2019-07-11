@@ -13,19 +13,23 @@ from .parsers import *
 # ========= FRAMEWORK =========== #
 
 class PaintRequestABC(object):
-    def __init__(self, file):
+    def __init__(self, file, **kwargs):
         """
         Args::
             file : string
                 filename of the image file to modify
         """
         self.file = file
+        self.markersize = kwargs.get('markersize',7)
+        self.markerfill = kwargs.get('markerfill',False)
         
     def draw_cell(self,axis,position,result):
-        markersize = 7
         colours = {EvaluationResult.CORRECT : "#00FF00", EvaluationResult.FALSE_POSITIVE : "r", EvaluationResult.FALSE_NEGATIVE : "y"}
-        axis.plot(position[0],position[1],"o", alpha=1, markersize=markersize, markerfacecolor = "none", markeredgecolor=colours[result]) 
-    
+        markerfacecolor = "none"
+        if self.markerfill:
+            markerfacecolor = colours[result]
+        axis.plot(position[0],position[1],"o", alpha=1, markersize=self.markersize, markerfacecolor = markerfacecolor, markeredgecolor=colours[result])
+
     def draw_line(self,axis,position1,position2,result):
         colours = {EvaluationResult.CORRECT : "#00FF00", EvaluationResult.FALSE_POSITIVE : "r", EvaluationResult.FALSE_NEGATIVE : "y"}
         axis.plot([position1[0], position2[0]], [position1[1], position2[1]], color=colours[result], linestyle='-', linewidth=1)
@@ -69,8 +73,8 @@ class DrawingOverlordABC(object):
 # ============= PAINT REQUEST IMPLEMENTATION =============== #
     
 class SegmentationDetail(PaintRequestABC):
-    def __init__(self, file, evaluation_detail):
-        PaintRequestABC.__init__(self,file)
+    def __init__(self, file, evaluation_detail, **kwargs):
+        PaintRequestABC.__init__(self,file, **kwargs)
         self.evaluation_detail = evaluation_detail
         
     def draw(self,image, axis):
@@ -96,9 +100,12 @@ class TrackingDetail(PaintRequestABC):
 
 EvaluationType = Enum("SEGMENTATION","TRACKING","MISC")
 class EvaluationDetails(DrawingOverlordABC):
-    def __init__(self, params):
+    def __init__(self, params, fill_markers=False, markersize=7):
+        DrawingOverlordABC.__init__(self, params)
         self.details_file = params[0]
         self.required_substring = None
+        self.fill_markers=fill_markers
+        self.markersize = markersize
         if(len(params)>1):
             self.required_substring = params[1]
         if(len(params)>2):
@@ -158,7 +165,7 @@ class EvaluationDetails(DrawingOverlordABC):
         '@type data_sample: EvaluationDetail'
         if data_sample.result != EvaluationResult.CORRECT or self.draw_correct:
             if isinstance(data_sample,SegmentationResult):
-                return [SegmentationDetail(image_file,data_sample)]
+                return [SegmentationDetail(image_file,data_sample, markerfill=self.fill_markers, markersize=self.markersize)]
             elif isinstance(data_sample,TrackingResult):
                 return [TrackingDetail(image_file,data_sample)]
         return []
@@ -208,7 +215,10 @@ def get_trailing_number(filepath):
 
 def run(overlord, directory_images, directory_output, desired_output_file_prefix = None):
     global output_file_prefix
-    
+
+    if not os.path.exists(directory_output):
+        os.makedirs(directory_output)
+
     data = overlord.read_data()
     output_file_prefix = desired_output_file_prefix or output_file_prefix
     # =========== READ INPUT IMAGES ============= #
@@ -268,6 +278,6 @@ if __name__== "__main__":
     directory_images = sys.argv[1]
     directory_output = sys.argv[2]
     output_file_prefix = sys.argv[3]
-    overlord = EvaluationDetails(sys.argv[4:])
+    overlord = EvaluationDetails(sys.argv[4:], fill_markers=True, markersize=5)
     run(overlord,directory_images,directory_output,output_file_prefix)
     
