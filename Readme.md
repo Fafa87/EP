@@ -9,6 +9,8 @@ version 1.1.0
 
 See wiki for more information (poster on Image Bioinformatics).
 
+See ep.ReadMe.txt for more detailed information about installation and usage.
+
 Tool was created and used for evaluation of the algorithms in http://yeast-image-toolkit.biosim.eu/ comparison.
 
 "Yeast Image Toolkit: A benchmark and evaluation strategy for yeast segmentation and tracking algorithms", S. Stoma and F. Mroz and A. Kaczmarek, Image Bioinformatics, Leuven, Belgium, 2014.
