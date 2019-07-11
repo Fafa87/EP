@@ -30,11 +30,9 @@ def find_all_created_files_paths(folder):
 def find_all_created_directories(folder):
     directories = [f for f in os.listdir(folder) if os.path.isdir(os.path.join(folder,f)) and any([ s in f for s in ALL_DIRECTORIES])]
     return [os.path.join(folder,d) for d in directories]
-    
+
 def get_trailing_number(text):
-    reversed = text[::-1]
-    m = re.search("\D", reversed + " ")
-    return reversed[:m.start()][::-1]
+    return parse_file_order(get_trailing_order(text, is_path=False))
         
 def determine_all_snaptimes(file_names):
     """Return list of times."""

@@ -203,10 +203,7 @@ get_path_new_file = lambda directory,filename: os.path.join(directory,"".join([o
 # =============== SCRIPT USAGE PARAMETERS ================= #
 
 def get_trailing_number(filepath):
-    filename = os.path.splitext(filepath)[0]
-    reversed_name = filename[::-1]
-    m = re.search("\D", reversed_name + " ")
-    return reversed_name[:m.start()][::-1]
+    return parse_file_order(get_trailing_order(filepath, is_path=True))
 
 
 def run(overlord, directory_images, directory_output, desired_output_file_prefix = None):

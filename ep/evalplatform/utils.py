@@ -1,5 +1,6 @@
 import csv
 import os
+import re
 import stat
 import sys
 from functools import reduce
@@ -130,6 +131,28 @@ def determine_output_filepath(filepath, output_path):
 
 def distance(p0, p1):
     return ((p0[0] - p1[0]) ** 2 + (p0[1] - p1[1]) ** 2) ** 0.5
+
+
+def get_trailing_order(text, is_path=False):
+    if is_path:
+        text = os.path.splitext(text)[0]
+    reversed_name = text[::-1]
+    m = re.search("\D", reversed_name + " ")
+    return reversed_name[:m.start()][::-1]
+
+
+def parse_file_order(order_object):
+    if isinstance(order_object, str):
+        try:
+            order_normalized = int(order_object)
+        except ValueError:
+            order_normalized = order_object
+    elif isinstance(order_object, int):
+        order_normalized = int(order_object)
+    else
+        raise Exception("Order is neither str nor int: " + str(order_object))
+
+    return str(order_normalized)
 
 
 def package_path(filename, quoted=1):

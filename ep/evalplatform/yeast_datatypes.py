@@ -1,6 +1,6 @@
 import numpy as np
 from cached_property import cached_property
-from .utils import slices_intersection, slices_relative
+from .utils import slices_intersection, slices_relative, parse_file_order
 
 
 class CellOccurence:
@@ -11,10 +11,7 @@ class CellOccurence:
         colour = 0 - cell
         colour != 0 - maybe cell
         """
-        if isinstance(frame_number, str):
-            frame_number = frame_number.lstrip('0')
-
-        self.frame_number = str(frame_number)
+        self.frame_number = parse_file_order(frame_number)
         self.cell_id = cell_id
         self.unique_id = unique_id
         self.position = position
