@@ -63,8 +63,9 @@ class ImageCellParser:
 
         res = []
         # first line are headers
-        for i, p in list(enumerate(image_paths))[1:]:
-            res += self.load_single_image(i, p.split(',')[1].strip())
+        for line in image_paths[1:]:
+            data = line.split(',')
+            res += self.load_single_image(data[0].strip(), data[1].strip())
         return res
 
     def load_from_file(self, path):

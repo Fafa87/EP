@@ -1,6 +1,6 @@
 import numpy as np
 from cached_property import cached_property
-from .utils import slices_intersection, slices_relative
+from .utils import slices_intersection, slices_relative, parse_file_order
 
 
 class CellOccurence:
@@ -11,7 +11,7 @@ class CellOccurence:
         colour = 0 - cell
         colour != 0 - maybe cell
         """
-        self.frame_number = frame_number
+        self.frame_number = parse_file_order(frame_number)
         self.cell_id = cell_id
         self.unique_id = unique_id
         self.position = position
@@ -123,7 +123,7 @@ class EvaluationDetail(object):
 
     def __init__(self, frame, result):
         self.result = result
-        self.frame = frame
+        self.frame = parse_file_order(frame)
 
     def __str__(self):
         return "{0} - {1}".format(self.frame, EvaluationResult.reverse_mapping[self.result])
@@ -147,7 +147,7 @@ class EvaluationDetail(object):
         return [self.frame, EvaluationResult.reverse_mapping[self.result]]
 
     def csv_read(self, record):
-        self.frame = int(record[0])
+        self.frame = parse_file_order(record[0])
         self.result = EvaluationResult.__getattribute__(EvaluationResult, record[1])
         return record[2:]
 
@@ -266,7 +266,7 @@ class TrackingResult(EvaluationDetail):
 
     def csv_read(self, record):
         record = EvaluationDetail.csv_read(self, record)
-        self.prev_frame = record[0]
+        self.prev_frame = parse_file_order(record[0])
         record = record[1:]
 
         def read_link(record, strip_record=False):
