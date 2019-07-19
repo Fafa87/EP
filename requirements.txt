@@ -5,3 +5,4 @@ Pillow>=2.5.3
 scipy>=1.0.0
 imageio>=2.2.0
 cached-property>=1.4.0
+fire
