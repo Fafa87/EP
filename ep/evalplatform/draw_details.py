@@ -109,7 +109,7 @@ class EvaluationDetails(DrawingOverlordABC):
         self.required_substring = required_substring
         self.fill_markers = fill_markers
         self.markersize = markersize
-        self.details_type = details_type or EvaluationDetails.determine_type(self.details_type)
+        self.details_type = details_type or EvaluationDetails.determine_type(self.details_file)
         self.draw_correct = draw_correct
 
     @staticmethod
@@ -240,12 +240,13 @@ def run(overlord, directory_images, directory_output, desired_output_file_prefix
         
     keyfunc = lambda req: req.file
     requests = sorted(requests, key=keyfunc)
-    file_groups = itertools.groupby(requests,keyfunc)
+    file_groups = {file: list(group) for file, group in itertools.groupby(requests,keyfunc)}
     
     debug_center.show_in_console(None, "Progress", "Applying requests on input images...")
-    for file,group in file_groups:
+    for file in image_number_dict.values():
+        group = file_groups.get(file, [])
         filename = os.path.basename(file)
-        requests = list(group)
+        file_requests = list(group)
         image_raw = imageio.imread(get_old_path_file(file))
         image = image_raw.astype(float) / np.iinfo(image_raw.dtype).max
         fig = plt.figure(frameon=False)
@@ -256,7 +257,7 @@ def run(overlord, directory_images, directory_output, desired_output_file_prefix
         ax.imshow(image, cmap=plt.cm.gray)
     
         i = 0
-        for req in requests:
+        for req in file_requests:
             req.draw(image,ax)
             i=i+1        
             #print "Applied", i, "out of", len(requests), "for this file..."
