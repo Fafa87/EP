@@ -44,6 +44,8 @@ sudo pip install imageio
 	- debug verbosity which limits the amount of information printed to console.
 		Values are: 1 (Errors), 2 (+Warnings), 3 (+Informations), 3.1 (+Evaluation progress), 3.2 (+platform technicalities)
 	- terminal is the output plots format, supported values are "svg" and "png"
+	- fill_markers if 1 then the cell centers are filled in segmentation details
+    - markersize the size of the cell centers in segmentation details
 
 4. Usage ep.evaluate with cell centers formats 
 	This program can assess the algorithm results based on provided ground truth.

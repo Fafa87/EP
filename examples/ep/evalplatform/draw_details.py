@@ -226,9 +226,11 @@ def run(overlord, directory_images, directory_output, desired_output_file_prefix
     debug_center.show_in_console(None, "Progress", "Creating paint requests...")
     
     requests = []
+    files_with_data = set()
     for (frame, data_piece) in data:
         if frame in image_number_dict:
             image = image_number_dict[frame]
+            files_with_data.add(image)
             requests = requests + overlord.create_paint_request(frame, image, data_piece)
         
     debug_center.show_in_console(None, "Progress", "".join(["Created " , str(len(requests)), " paint requests out of ", str(len(data)), " data points."]))
@@ -243,7 +245,7 @@ def run(overlord, directory_images, directory_output, desired_output_file_prefix
     file_groups = {file: list(group) for file, group in itertools.groupby(requests,keyfunc)}
     
     debug_center.show_in_console(None, "Progress", "Applying requests on input images...")
-    for file in image_number_dict.values():
+    for file in files_with_data:
         group = file_groups.get(file, [])
         filename = os.path.basename(file)
         file_requests = list(group)

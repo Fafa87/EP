@@ -25,6 +25,8 @@ cutoff = 30  # pixels
 cutoff_iou = 0.3  # intersection / union
 output_evaluation_details = 0
 draw_evaluation_details = 0
+fill_markers = False
+markersize = 7
 
 def filter_border(celllist):
     if(celllist == []):
@@ -214,7 +216,7 @@ def calculate_stats_tracking(params_last,last_mapping,params_new,new_mapping):
 
 
 def load_general_ini(path):
-    global cutoff, cutoff_iou, draw_evaluation_details, ignored_frame_size, loaded_ini
+    global cutoff, cutoff_iou, draw_evaluation_details, ignored_frame_size, loaded_ini, fill_markers, markersize
     loaded_ini = True
     if read_ini(path, 'evaluation', 'maxmatchdistance') != '':
         cutoff = float(read_ini(path, 'evaluation', 'maxmatchdistance'))
@@ -224,6 +226,10 @@ def load_general_ini(path):
         draw_evaluation_details = float(read_ini(path, 'evaluation', 'drawevaluationdetails'))
     if read_ini(path, 'evaluation', 'ignoredframesize') != '':
         ignored_frame_size = float(read_ini(path, 'evaluation', 'ignoredframesize'))
+    if read_ini(path, 'details', 'fill_markers') != '':
+        fill_markers = bool(read_ini(path, 'details', 'fill_markers'))
+    if read_ini(path, 'details', 'markersize') != '':
+        markersize = int(read_ini(path, 'details', 'markersize'))
 
 
 def run_script(args):
@@ -349,7 +355,10 @@ def run_script(args):
                 if not (input_directory is None or input_file_part is None):
                     debug_center.show_in_console(None,"Progress","Drawing detailed segmentation results...")
                     output_file_prefix = "SegDetails_"
-                    overlord = draw_details.EvaluationDetails(details_path=details_path, required_substring=input_file_part)
+                    overlord = draw_details.EvaluationDetails(details_path,
+                                                              required_substring=input_file_part,
+                                                              fill_markers=fill_markers,
+                                                              markersize=markersize)
                     output_drawings_directory = ensure_directory_in(details_path,SEG_DRAWING_FOLDER)
                     draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
                     debug_center.show_in_console(None,"Progress","Done drawing detailed segmentation results...")   
@@ -412,7 +421,10 @@ def run_script(args):
                     if not (input_directory is None or input_file_part is None):
                         debug_center.show_in_console(None,"Progress","Drawing detailed tracking results...")
                         output_file_prefix = "TrackDetails_"
-                        overlord = draw_details.EvaluationDetails(details_path=details_path, required_substring=input_file_part)
+                        overlord = draw_details.EvaluationDetails(details_path,
+                                                                  required_substring=input_file_part,
+                                                                  fill_markers=fill_markers,
+                                                                  markersize=markersize)
                         output_drawings_directory = ensure_directory_in(details_path,TRACK_DRAWING_FOLDER)
                         draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
                         debug_center.show_in_console(None,"Progress","Done drawing detailed tracking results...")   
@@ -445,7 +457,10 @@ def run_script(args):
                         if not (input_directory is None or input_file_part is None):
                             debug_center.show_in_console(None,"Progress","Drawing detailed long-time tracking results...")
                             output_file_prefix = "LongTrackDetails_"
-                            overlord = draw_details.EvaluationDetails(details_path=details_path, required_substring=input_file_part)
+                            overlord = draw_details.EvaluationDetails(details_path,
+                                                                      required_substring=input_file_part,
+                                                                      fill_markers=fill_markers,
+                                                                      markersize=markersize)
                             output_drawings_directory = ensure_directory_in(details_path,LONG_DRAWING_FOLDER)
                             draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
                             debug_center.show_in_console(None,"Progress","Done drawing detailed long-time tracking results...")   
