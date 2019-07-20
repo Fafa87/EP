@@ -1,6 +1,6 @@
 import sys
 
-import evalplatform.plot_comparison as simple_eval
+import ep.evalplatform.plot_comparison as simple_eval
 
 
 def evaluate_one_frame(gt_file_path, result_file_path, algo_name, parser_symbol="PLATFORM_DEF", image_size=(100000, 100000)):
