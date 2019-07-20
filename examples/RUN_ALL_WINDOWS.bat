@@ -7,3 +7,4 @@ call EVALUATE_TS5_STAR_SEG.bat
 call COMPARE_TS3.bat
 call COMPARE_TS5.bat
 call EVALUATE_VAR_LABELS_SEGMENTER.bat
+call DRAW_TS2.bat

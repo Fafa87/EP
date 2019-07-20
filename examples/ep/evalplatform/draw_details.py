@@ -3,6 +3,7 @@ import os
 import re
 
 import imageio
+import fire
 import scipy.misc as misc
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -13,19 +14,23 @@ from .parsers import *
 # ========= FRAMEWORK =========== #
 
 class PaintRequestABC(object):
-    def __init__(self, file):
+    def __init__(self, file, **kwargs):
         """
         Args::
             file : string
                 filename of the image file to modify
         """
         self.file = file
+        self.markersize = kwargs.get('markersize',7)
+        self.markerfill = kwargs.get('markerfill',False)
         
     def draw_cell(self,axis,position,result):
-        markersize = 7
         colours = {EvaluationResult.CORRECT : "#00FF00", EvaluationResult.FALSE_POSITIVE : "r", EvaluationResult.FALSE_NEGATIVE : "y"}
-        axis.plot(position[0],position[1],"o", alpha=1, markersize=markersize, markerfacecolor = "none", markeredgecolor=colours[result]) 
-    
+        markerfacecolor = "none"
+        if self.markerfill:
+            markerfacecolor = colours[result]
+        axis.plot(position[0],position[1],"o", alpha=1, markersize=self.markersize, markerfacecolor = markerfacecolor, markeredgecolor=colours[result])
+
     def draw_line(self,axis,position1,position2,result):
         colours = {EvaluationResult.CORRECT : "#00FF00", EvaluationResult.FALSE_POSITIVE : "r", EvaluationResult.FALSE_NEGATIVE : "y"}
         axis.plot([position1[0], position2[0]], [position1[1], position2[1]], color=colours[result], linestyle='-', linewidth=1)
@@ -34,7 +39,7 @@ class PaintRequestABC(object):
         pass      
 
 class DrawingOverlordABC(object):
-    def __init__(self, params):
+    def __init__(self, **kwargs):
         pass
     
     def help_params(self):
@@ -69,8 +74,8 @@ class DrawingOverlordABC(object):
 # ============= PAINT REQUEST IMPLEMENTATION =============== #
     
 class SegmentationDetail(PaintRequestABC):
-    def __init__(self, file, evaluation_detail):
-        PaintRequestABC.__init__(self,file)
+    def __init__(self, file, evaluation_detail, **kwargs):
+        PaintRequestABC.__init__(self,file, **kwargs)
         self.evaluation_detail = evaluation_detail
         
     def draw(self,image, axis):
@@ -96,22 +101,19 @@ class TrackingDetail(PaintRequestABC):
 
 EvaluationType = Enum("SEGMENTATION","TRACKING","MISC")
 class EvaluationDetails(DrawingOverlordABC):
-    def __init__(self, params):
-        self.details_file = params[0]
-        self.required_substring = None
-        if(len(params)>1):
-            self.required_substring = params[1]
-        if(len(params)>2):
-            self.details_type = params[2]
-        else:
-            self.details_type = self.determine_type(self.details_file)
-            
-        if(len(params)>3):
-            self.draw_correct = params[3]
-        else:
-            self.draw_correct = True
-            
-    def determine_type(self, filepath):
+    def __init__(self, details_file,
+                 required_substring=None, details_type=None, draw_correct=True,
+                 fill_markers=False, markersize=7, **kwargs):
+        DrawingOverlordABC.__init__(self, **kwargs)
+        self.details_file = details_file
+        self.required_substring = required_substring
+        self.fill_markers = fill_markers
+        self.markersize = markersize
+        self.details_type = details_type or EvaluationDetails.determine_type(self.details_file)
+        self.draw_correct = draw_correct
+
+    @staticmethod
+    def determine_type(filepath):
         if SEGDETAILS_SUFFIX in filepath:
             return EvaluationType.SEGMENTATION
         elif TRACKDETAILS_SUFFIX in filepath or LONGTRACKDETAILS_SUFFIX in filepath:
@@ -158,7 +160,7 @@ class EvaluationDetails(DrawingOverlordABC):
         '@type data_sample: EvaluationDetail'
         if data_sample.result != EvaluationResult.CORRECT or self.draw_correct:
             if isinstance(data_sample,SegmentationResult):
-                return [SegmentationDetail(image_file,data_sample)]
+                return [SegmentationDetail(image_file,data_sample, markerfill=self.fill_markers, markersize=self.markersize)]
             elif isinstance(data_sample,TrackingResult):
                 return [TrackingDetail(image_file,data_sample)]
         return []
@@ -202,13 +204,17 @@ get_path_new_file = lambda directory,filename: os.path.join(directory,"".join([o
 
 # =============== SCRIPT USAGE PARAMETERS ================= #
 
+
 def get_trailing_number(filepath):
     return parse_file_order(get_trailing_order(filepath, is_path=True))
 
 
 def run(overlord, directory_images, directory_output, desired_output_file_prefix = None):
     global output_file_prefix
-    
+
+    if not os.path.exists(directory_output):
+        os.makedirs(directory_output)
+
     data = overlord.read_data()
     output_file_prefix = desired_output_file_prefix or output_file_prefix
     # =========== READ INPUT IMAGES ============= #
@@ -234,12 +240,13 @@ def run(overlord, directory_images, directory_output, desired_output_file_prefix
         
     keyfunc = lambda req: req.file
     requests = sorted(requests, key=keyfunc)
-    file_groups = itertools.groupby(requests,keyfunc)
+    file_groups = {file: list(group) for file, group in itertools.groupby(requests,keyfunc)}
     
     debug_center.show_in_console(None, "Progress", "Applying requests on input images...")
-    for file,group in file_groups:
+    for file in image_number_dict.values():
+        group = file_groups.get(file, [])
         filename = os.path.basename(file)
-        requests = list(group)
+        file_requests = list(group)
         image_raw = imageio.imread(get_old_path_file(file))
         image = image_raw.astype(float) / np.iinfo(image_raw.dtype).max
         fig = plt.figure(frameon=False)
@@ -250,7 +257,7 @@ def run(overlord, directory_images, directory_output, desired_output_file_prefix
         ax.imshow(image, cmap=plt.cm.gray)
     
         i = 0
-        for req in requests:
+        for req in file_requests:
             req.draw(image,ax)
             i=i+1        
             #print "Applied", i, "out of", len(requests), "for this file..."
@@ -260,14 +267,12 @@ def run(overlord, directory_images, directory_output, desired_output_file_prefix
     
     debug_center.show_in_console(None, "Progress", "Done applying requests on input images...")
 
-if __name__== "__main__": 
-    if len(sys.argv) == 1:
-        print ("Parameters: input_images_directory, output_images_directory, output_file_prefix" + EvaluationDetails.help_params())
-        exit(0)
-    
-    directory_images = sys.argv[1]
-    directory_output = sys.argv[2]
-    output_file_prefix = sys.argv[3]
-    overlord = EvaluationDetails(sys.argv[4:])
-    run(overlord,directory_images,directory_output,output_file_prefix)
-    
+
+def main(input_images_directory, output_images_directory, output_file_prefix,
+         details_file, **kwargs):
+    overlord = EvaluationDetails(details_file=details_file, **kwargs)
+    run(overlord, input_images_directory, output_images_directory, output_file_prefix)
+
+
+if __name__== "__main__":
+    fire.Fire(main)

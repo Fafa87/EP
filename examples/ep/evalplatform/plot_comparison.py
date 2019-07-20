@@ -349,7 +349,7 @@ def run_script(args):
                 if not (input_directory is None or input_file_part is None):
                     debug_center.show_in_console(None,"Progress","Drawing detailed segmentation results...")
                     output_file_prefix = "SegDetails_"
-                    overlord = draw_details.EvaluationDetails([details_path,input_file_part])
+                    overlord = draw_details.EvaluationDetails(details_path=details_path, required_substring=input_file_part)
                     output_drawings_directory = ensure_directory_in(details_path,SEG_DRAWING_FOLDER)
                     draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
                     debug_center.show_in_console(None,"Progress","Done drawing detailed segmentation results...")   
@@ -412,7 +412,7 @@ def run_script(args):
                     if not (input_directory is None or input_file_part is None):
                         debug_center.show_in_console(None,"Progress","Drawing detailed tracking results...")
                         output_file_prefix = "TrackDetails_"
-                        overlord = draw_details.EvaluationDetails([details_path,input_file_part])
+                        overlord = draw_details.EvaluationDetails(details_path=details_path, required_substring=input_file_part)
                         output_drawings_directory = ensure_directory_in(details_path,TRACK_DRAWING_FOLDER)
                         draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
                         debug_center.show_in_console(None,"Progress","Done drawing detailed tracking results...")   
@@ -445,7 +445,7 @@ def run_script(args):
                         if not (input_directory is None or input_file_part is None):
                             debug_center.show_in_console(None,"Progress","Drawing detailed long-time tracking results...")
                             output_file_prefix = "LongTrackDetails_"
-                            overlord = draw_details.EvaluationDetails([details_path,input_file_part])
+                            overlord = draw_details.EvaluationDetails(details_path=details_path, required_substring=input_file_part)
                             output_drawings_directory = ensure_directory_in(details_path,LONG_DRAWING_FOLDER)
                             draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
                             debug_center.show_in_console(None,"Progress","Done drawing detailed long-time tracking results...")   

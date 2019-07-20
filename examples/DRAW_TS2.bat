@@ -1,0 +1,1 @@
+python -m ep.evalplatform.draw_details TestSet2\RawData "Output\TestSet2\Tracker\Segmentation details" SegDetailsB_ Output\TestSet2\Tracker\TrackerResults.txt.Tracker.eval.segdetails.txt --fill_markers 1 --markersize 5
