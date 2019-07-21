@@ -1,6 +1,8 @@
 # EVALUATION TOOL FOR CELL SEGMENTATION AND TRACKING
 version 1.1.0
 
+[![Build Status](https://travis-ci.org/Fafa87/EP.svg?branch=master)](https://travis-ci.org/Fafa87/EP)
+
 ## Requirements
 - Python version 2.7, 3.7
 - PIL (python library)
