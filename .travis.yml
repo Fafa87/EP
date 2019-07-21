@@ -8,10 +8,10 @@ notifications:
 python:
   - 2.7
   - 3.4
-  - 3.7
-sudo: false
+  - 3.6
 virtualenv:
   system_site_packages: true
+sudo: false
 before_install:
   - sudo apt-get install python-tk
   - sudo apt-get install python3-tk
