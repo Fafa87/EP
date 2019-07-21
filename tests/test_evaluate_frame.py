@@ -2,6 +2,8 @@
 from copy import deepcopy
 from unittest import skip
 
+import numpy as np
+
 from ep import evaluate_frame
 from ep.evalplatform.yeast_datatypes import CellOccurence
 from tests.testbase import TestBase
@@ -11,10 +13,10 @@ class TestEvaluateFrame(TestBase):
     def setUp(self):
         super(TestEvaluateFrame, self).setUp()
         self.gt_data = {1: CellOccurence(3, 1, 1, (100, 100), 0),
-                        2: CellOccurence(3, 2, 2, (200, 200), 1),
+                        2: CellOccurence(3, 2, 2, (210, 200), 1),
                         7: CellOccurence(3, 3, 3, (300, 300), 0),
                         8: CellOccurence(3, 4, 4, (10, 350), 0),
-                        9: CellOccurence(3, 5, 5, (500, 500), 0)}
+                        9: CellOccurence(3, 5, 5, (490, 490), 0)}
         self.algo_data = {2: CellOccurence(3, 1, 1, (400, 100)),
                           3: CellOccurence(3, 2, 2, (10, 150)),
                           4: CellOccurence(3, 3, 3, (10, 160)),
@@ -31,6 +33,12 @@ class TestEvaluateFrame(TestBase):
                 file.write("{frame}, {cellid}, {color}, {posx}, {posy}\n".format(
                     frame=cell.frame_number, cellid=cell.cell_id, posx=cell.position[0], posy=cell.position[1],
                     color=cell.colour))
+
+    def save_in_mask_format(self, filename, cells, radius):
+        image = np.zeros((510, 510), dtype=np.uint8)
+        for cell in cells:
+            self.draw_cell(image, cell.position, radius, cell.colour + 1)
+        self.save_temp(filename, image)
 
     def test_single_evaluation_all(self):
         self.save_in_platform_format("gt.csv", self.gt_data.values())
@@ -93,9 +101,40 @@ class TestEvaluateFrame(TestBase):
     def test_single_evaluation_ignore_borders(self):
         pass
 
-    @skip("TODO")
     def test_single_evaluation_with_mask_format(self):
-        pass
+        gt_data_1_frame = deepcopy(self.gt_data)
+        for gt in gt_data_1_frame.values():
+            gt.frame_number = 1
+
+        algo_data_1_frame = deepcopy(self.algo_data)
+        for algo in algo_data_1_frame.values():
+            algo.frame_number = 1
+
+        self.save_in_mask_format("gt.tif", gt_data_1_frame.values(), 4)
+        self.save_in_mask_format("algo.tif", algo_data_1_frame.values(), 4)
+
+        metrics, details = evaluate_frame.evaluate_one_frame("gt.tif", "algo.tif", "Kartek", parser_symbol="MASK")
+        self.assertEqual(2.0 / 7, metrics["Precision"])
+        self.assertEqual(2.0 / 4, metrics["Recall"])
+        self.assertEqual(4.0 / 11, metrics["F"])
+
+        correct_pairs = [(c.cell_GT, c.cell_algo) for c in details["Correct"]]
+        self.assertEqual(2, len(correct_pairs))
+        self.assertIn((gt_data_1_frame[7], algo_data_1_frame[7]), correct_pairs)
+        self.assertIn((gt_data_1_frame[8], algo_data_1_frame[8]), correct_pairs)
+
+        fp_pairs = [(c.cell_GT, c.cell_algo) for c in details["FalsePositive"]]
+        self.assertEqual(5, len(fp_pairs))
+        self.assertIn((None, algo_data_1_frame[3]), fp_pairs)
+        self.assertIn((None, algo_data_1_frame[4]), fp_pairs)
+        self.assertIn((None, algo_data_1_frame[2]), fp_pairs)
+        self.assertIn((None, algo_data_1_frame[5]), fp_pairs)
+        self.assertIn((None, algo_data_1_frame[10]), fp_pairs)
+
+        fn_pairs = [(c.cell_GT, c.cell_algo) for c in details["FalseNegative"]]
+        self.assertEqual(2, len(fn_pairs))
+        self.assertIn((gt_data_1_frame[1], None), fn_pairs)
+        self.assertIn((gt_data_1_frame[9], None), fn_pairs)
 
     @skip("TODO")
     def test_single_evaluation_uses_ini_values(self):

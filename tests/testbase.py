@@ -2,7 +2,6 @@ import os
 import unittest
 
 import imageio
-import numpy as np
 
 
 class TestBase(unittest.TestCase):
@@ -20,3 +19,10 @@ class TestBase(unittest.TestCase):
     def create_temp(self, path):
         self.to_clear.append(path)
         return open(path, "w")
+
+    def draw_cell(self, image, position, radius, value):
+        left = max(0, position[0] - radius)
+        top = max(0, position[1] - radius)
+        right = position[0] + radius
+        bottom = position[1] + radius
+        image[top: bottom + 1, left: right + 1] = value

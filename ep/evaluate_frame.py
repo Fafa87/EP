@@ -7,7 +7,7 @@ def evaluate_one_frame(gt_file_path, result_file_path, algo_name, parser_symbol=
     """
     Assumes that gt_file_path and result_file_path have format parsable by parser of provided symbol.
     """
-    gt_data = simple_eval.read_ground_truth(gt_file_path)
+    gt_data = simple_eval.read_ground_truth(gt_file_path, parser=simple_eval.input_type[parser_symbol])
     res_data = simple_eval.read_results(result_file_path, simple_eval.input_type[parser_symbol], algo_name)
 
     gt_single_data = [a[1] for a in gt_data]
