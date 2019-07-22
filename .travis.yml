@@ -7,10 +7,8 @@ notifications:
   email: false
 python:
   - 2.7
-  - "3.4_with_system_site_packages"
+#  - 3.4  temporarily inactive (problem with travis) 
   - 3.6
-virtualenv:
-  system_site_packages: true
 sudo: false
 before_install:
   - sudo apt-get install python-tk

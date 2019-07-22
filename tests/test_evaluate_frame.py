@@ -15,14 +15,14 @@ class TestEvaluateFrame(TestBase):
                         7: CellOccurence(3, 3, 3, (300, 300), 0),
                         8: CellOccurence(3, 4, 4, (10, 350), 0),
                         9: CellOccurence(3, 5, 5, (490, 490), 0)}
-        self.algo_data = {2: CellOccurence(3, 1, 1, (400, 100)),
-                          3: CellOccurence(3, 2, 2, (10, 150)),
-                          4: CellOccurence(3, 3, 3, (10, 160)),
-                          5: CellOccurence(3, 4, 4, (210, 210)),
-                          6: CellOccurence(3, 5, 5, (210, 200)),
+        self.algo_data = {2: CellOccurence(3, 1, 1, (400, 102)),
+                          3: CellOccurence(3, 2, 2, (12, 150)),
+                          4: CellOccurence(3, 3, 3, (10, 162)),
+                          5: CellOccurence(3, 4, 4, (212, 210)),
+                          6: CellOccurence(3, 5, 5, (210, 199)),
                           7: CellOccurence(3, 6, 6, (300, 300)),
-                          8: CellOccurence(3, 7, 7, (10, 350)),
-                          10: CellOccurence(3, 5, 5, (250, 500))}
+                          8: CellOccurence(3, 7, 7, (11, 350)),
+                          10: CellOccurence(3, 5, 5, (251, 500))}
 
     def test_single_evaluation_all(self):
         self.save_in_platform_format("gt.csv", self.gt_data.values())
