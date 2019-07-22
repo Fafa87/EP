@@ -38,14 +38,14 @@ def filter_border(celllist):
     else:
         print (celllist)
     
-def read_ground_truth(path):
+def read_ground_truth(path, parser=None):
     """
     Returns::
         [Cell]
     """
+    parser = parser or ground_truth_parser
     debug_center.show_in_console(None,"Progress","Reading ground truth data...")
-    debug_center.show_in_console(None,"Tech","".join(["Uses ", ground_truth_parser.__class__.__name__, " parser..."]))
-    parser = ground_truth_parser
+    debug_center.show_in_console(None,"Tech","".join(["Uses ", parser.__class__.__name__, " parser..."]))
     cells = parser.load_from_file(path)
     debug_center.show_in_console(None,"Progress","Done reading ground truth data...")
     return cells

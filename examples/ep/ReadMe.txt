@@ -166,14 +166,18 @@ sudo pip install imageio
 		
 	Example:
 		python -m ep.compare TestSet1 Algo1 Algo2
+
+7. Usage ep.evaluate_frame
+    This is an additional code that can be used in order to evaluate a single set of files with a very simple syntax.
+    It can be used in a feedback loop or parameter search for some external tool (e.g. QuPath) both by CLI or by importing that and using it directly (see test_evaluate_frame.py for details). You can specify parser to use so that image parsers can be utilised as well.
 		
-7. Plots customisation
+8. Plots customisation
 	By default all the plots are generated as PNG files but there is an option to use vector format namely SVG. In order to do so open evaluation.ini file and set parameter "terminal" to "svg". However this option does not support merging plots to tiles.
 	
 	Gnuplot is used to plot the results so it is possible to modify the look of them by changing gnuplot scripts files: segmentation.plt, tracking.plt.
 		
-8. Additional options and informations about ep.evaluate
-	Apart from the basic use the evalutation platform can work with a couple of different formats.
+9. Additional options and informations about ep.evaluate
+	Apart from the basic use the evaluation platform can work with a couple of different formats.
 	
 	Two more formats of ground truth/algorithm results. In case of the algorithm results files Cell_colour column is not present:
 		+ Two files per data (all frames packed into one file):
@@ -214,6 +218,6 @@ sudo pip install imageio
 			
 			uses specific "CP" parser for CellProfiler data.
 			
-9. Help.
+10. Help.
 	If you still have questions or problems with Evaluation platform please do not hesitate and contact us - will be glad to help.
 	
