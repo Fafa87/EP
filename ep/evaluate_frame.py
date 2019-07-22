@@ -1,9 +1,10 @@
-import sys
+import fire
 
 import ep.evalplatform.plot_comparison as simple_eval
 
 
-def evaluate_one_frame(gt_file_path, result_file_path, algo_name, parser_symbol="PLATFORM_DEF", image_size=(100000, 100000)):
+def evaluate_one_frame(gt_file_path, result_file_path, algo_name, parser_symbol="PLATFORM_DEF",
+                       image_size=(100000, 100000)):
     """
     Assumes that gt_file_path and result_file_path have format parsable by parser of provided symbol.
     """
@@ -37,6 +38,4 @@ def show_details_one_frame(input_image, details, output_path):
 
 
 if __name__ == '__main__':
-    assert len(sys.argv) == 4
-    (metrics, _) = evaluate_one_frame(sys.argv[1], sys.argv[2], sys.argv[3])
-    print (metrics)
+    fire.Fire(evaluate_one_frame)
