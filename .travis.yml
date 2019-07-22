@@ -7,7 +7,7 @@ notifications:
   email: false
 python:
   - 2.7
-  - 3.4
+  - "3.4_with_system_site_packages"
   - 3.6
 virtualenv:
   system_site_packages: true
