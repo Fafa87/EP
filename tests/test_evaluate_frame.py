@@ -2,6 +2,7 @@
 from copy import deepcopy
 from unittest import skip
 
+import ep.evalplatform.plot_comparison as ep_plot_comparison
 from ep import evaluate_frame
 from ep.evalplatform.yeast_datatypes import CellOccurence
 from tests.testbase import TestBase
@@ -10,6 +11,7 @@ from tests.testbase import TestBase
 class TestEvaluateFrame(TestBase):
     def setUp(self):
         super(TestEvaluateFrame, self).setUp()
+        self.default_ignore_size = ep_plot_comparison.ignored_frame_size
         self.gt_data = {1: CellOccurence(3, 1, 1, (100, 100), 0),
                         2: CellOccurence(3, 2, 2, (210, 200), 1),
                         7: CellOccurence(3, 3, 3, (300, 300), 0),
@@ -23,6 +25,10 @@ class TestEvaluateFrame(TestBase):
                           7: CellOccurence(3, 6, 6, (300, 300)),
                           8: CellOccurence(3, 7, 7, (11, 350)),
                           10: CellOccurence(3, 5, 5, (251, 500))}
+
+    def tearDown(self):
+        super(TestEvaluateFrame, self).tearDown()
+        ep_plot_comparison.ignored_frame_size = self.default_ignore_size
 
     def test_single_evaluation_all(self):
         self.save_in_platform_format("gt.csv", self.gt_data.values())
@@ -81,9 +87,30 @@ class TestEvaluateFrame(TestBase):
         self.assertIn((self.gt_data[1], None), fn_pairs)
         self.assertIn((self.gt_data[9], None), fn_pairs)
 
-    @skip("TODO")
     def test_single_evaluation_ignore_borders(self):
-        pass
+        # manually turn on ignored_frame_size parameter
+        ep_plot_comparison.ignored_frame_size = 20
+
+        self.save_in_platform_format("gt.csv", self.gt_data.values())
+        self.save_in_platform_format("algo.csv", self.algo_data.values())
+
+        metrics, details = evaluate_frame.evaluate_one_frame("gt.csv", "algo.csv", "Kartek", image_size=(500, 500))
+        self.assertEqual(1.0 / 3, metrics["Precision"])
+        self.assertEqual(1.0 / 2, metrics["Recall"])
+        self.assertEqual(2.0 / 5, metrics["F"])
+
+        correct_pairs = [(c.cell_GT, c.cell_algo) for c in details["Correct"]]
+        self.assertEqual(1, len(correct_pairs))
+        self.assertIn((self.gt_data[7], self.algo_data[7]), correct_pairs)
+
+        fp_pairs = [(c.cell_GT, c.cell_algo) for c in details["FalsePositive"]]
+        self.assertEqual(2, len(fp_pairs))
+        self.assertIn((None, self.algo_data[2]), fp_pairs)
+        self.assertIn((None, self.algo_data[5]), fp_pairs)
+
+        fn_pairs = [(c.cell_GT, c.cell_algo) for c in details["FalseNegative"]]
+        self.assertEqual(1, len(fn_pairs))
+        self.assertIn((self.gt_data[1], None), fn_pairs)
 
     def test_single_evaluation_with_mask_format(self):
         self.save_in_mask_format("gt.tif", self.gt_data.values(), 4)

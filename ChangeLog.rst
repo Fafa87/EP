@@ -2,6 +2,13 @@
 CHANGE LOG:
 ===========
 
+`1.20`
+-------------------------
+* option to specify size of the ignored border - those objects are automatically marked as faculatative
+* evaluate_frame script which can evaluate a single pair of results-ground truth files so it can be easily used in feedback loop
+* option to customize the markers in details overlays
+* more flexible and consistent frame number extraction
+
 `1.10`
 -------------------------
 * python 3 compatibility

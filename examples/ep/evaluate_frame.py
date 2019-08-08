@@ -14,8 +14,8 @@ def evaluate_one_frame(gt_file_path, result_file_path, algo_name, parser_symbol=
     gt_single_data = [a[1] for a in gt_data]
     res_single_data = [a[1] for a in res_data[1]]
 
-    # TODO future option , image_size)
-    (cr, cg, corr, fp, fn) = simple_eval.calculate_stats_segmentation(gt_single_data, res_single_data)
+    (cr, cg, corr, fp, fn) = simple_eval.calculate_stats_segmentation(gt_single_data, res_single_data,
+                                                                      image_size=image_size)
 
     results_seg_summary = simple_eval.calculate_precision_recall_F_metrics(cr, cg, len(corr))
     metrics = {'Precision': results_seg_summary[0], 'Recall': results_seg_summary[1], 'F': results_seg_summary[2]}

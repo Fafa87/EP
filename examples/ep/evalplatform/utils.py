@@ -88,9 +88,13 @@ def get_config_file_path():
     """
     In case that cwd is not in the same directory that config file. Check if file is where the executed script is.
     """
+    chosen_path = CONFIG_FILENAME
     if not os.path.isfile(CONFIG_FILENAME):
-        return os.path.join(os.path.dirname(sys.argv[0]), CONFIG_FILENAME)
-    return CONFIG_FILENAME
+        chosen_path = os.path.join(os.path.dirname(sys.argv[0]), CONFIG_FILENAME)
+
+    if not os.path.isfile(chosen_path):
+        print("Config file: {0} does not exist.".format(chosen_path))
+    return chosen_path
 
 
 CONFIG_FILE = get_config_file_path()

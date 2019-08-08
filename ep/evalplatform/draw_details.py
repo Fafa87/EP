@@ -209,6 +209,18 @@ def get_trailing_number(filepath):
     return parse_file_order(get_trailing_order(filepath, is_path=True))
 
 
+def get_images_sizes(overlord, directory_images):
+    def get_image_size_xy(filepath):
+        shape_yx = misc.imread(filepath).shape
+        return (shape_yx[1], shape_yx[0])
+
+    def get_old_path_file(filename):
+        return os.path.join(directory_images,filename)
+
+    image_list = overlord.input_images(directory_images)
+    return dict([(get_trailing_number(f), get_image_size_xy(get_old_path_file(f))) for f in image_list])
+
+
 def run(overlord, directory_images, directory_output, desired_output_file_prefix = None):
     global output_file_prefix
 

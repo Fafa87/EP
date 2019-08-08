@@ -27,14 +27,19 @@ output_evaluation_details = 0
 draw_evaluation_details = 0
 fill_markers = False
 markersize = 7
+ignored_frame_size = 0
 
-def filter_border(celllist):
+def filter_border(celllist, image_size = (10000,10000)):
     if(celllist == []):
         return []
     if(isinstance(celllist[0],CellOccurence)):
-        return [cell for cell in celllist if not cell.obligatory()] 
+        def close_to_border(cell, limits):
+            return not (ignored_frame_size <= cell.position[0] <= (limits[0] - ignored_frame_size) and
+                        ignored_frame_size <= cell.position[1] <= (limits[1] - ignored_frame_size))
+
+        return [cell for cell in celllist if not cell.obligatory() or close_to_border(cell, image_size) ]
     elif(len(celllist[0]) == 2):
-        return [(cell_A, cell_B) for (cell_A, cell_B) in celllist if not cell_A.obligatory() or not cell_B.obligatory()] 
+        return [(cell_A, cell_B) for (cell_A, cell_B) in celllist if not cell_A.obligatory() or not cell_B.obligatory()]
     else:
         print (celllist)
     
@@ -134,33 +139,46 @@ def find_correspondence(ground_truth, results):
 
     return correspondences
 
-def calculate_stats_segmentation(ground_truth_frame, results_frame):
+def calculate_stats_segmentation(ground_truth_frame, results_frame, image_size = (100000,100000)):
     """
     Input: [Cell] x2
     Result: (cell_count_results, cell_count_ground_truth, correspondences, false_positives, false_negatives)
     """
+    load_general_ini(CONFIG_FILE)
+
+    border_results = filter_border(results_frame, image_size)
+    for c in border_results:
+        c.colour = 1
+
+    border_groundtruth = filter_border(ground_truth_frame, image_size)
+    for c in border_groundtruth:
+        c.colour = 1
+
     correspondence = find_correspondence(ground_truth_frame, results_frame)
-    border_correspondence = filter_border(correspondence)
-    border_groundtruth = filter_border(ground_truth_frame)
-    
+    border_correspondence = filter_border(correspondence, image_size)
+
     matched_GT = [gt for gt,_ in correspondence]
     matched_res = [res for _,res in correspondence]
-    
+
+    matched_border_GT = [gt for gt, _ in border_correspondence]
+    matched_border_res = [res for _, res in border_correspondence]
+
     correct_results = [SegmentationResult(gt,res) for (gt,res) in correspondence if (gt,res) not in border_correspondence]
+    obligatory_results = [res for res in results_frame if res not in border_results and res not in matched_border_res]
+    obligatory_gt = [gt for gt in ground_truth_frame if gt not in border_groundtruth and gt not in matched_border_GT]
     false_negatives = [SegmentationResult(gt,None) for gt in ground_truth_frame if gt not in border_groundtruth and gt not in matched_GT]
-    false_positives = [SegmentationResult(None,res) for res in results_frame if res not in matched_res]
-    
-    return (len(results_frame) - len(border_correspondence),len(ground_truth_frame) - len(border_groundtruth) ,
-            (correct_results), # len(correspondence)-len(border_correspondence),
-            (false_positives), #len(results_frame) - len(correspondence), 
-            (false_negatives)) # len(ground_truth_frame) - (len(border_groundtruth)-len(border_correspondence)) - len(correspondence))
-            # evaluation_details
-            
+    false_positives = [SegmentationResult(None,res) for res in results_frame if res not in border_results and res not in matched_res]
+
+    return (len(obligatory_results),len(obligatory_gt),
+            correct_results,
+            false_positives,
+            false_negatives)
+
 def calculate_precision_recall_F_metrics(algorithm_number, real_number, correct_number):
     """
     Result: (precision, recall, F)
     """
-    if algorithm_number == 0:  
+    if algorithm_number == 0:
         precision = 0
     else:
         precision = float(correct_number)/algorithm_number
@@ -217,19 +235,20 @@ def calculate_stats_tracking(params_last,last_mapping,params_new,new_mapping):
 
 def load_general_ini(path):
     global cutoff, cutoff_iou, draw_evaluation_details, ignored_frame_size, loaded_ini, fill_markers, markersize
-    loaded_ini = True
-    if read_ini(path, 'evaluation', 'maxmatchdistance') != '':
-        cutoff = float(read_ini(path, 'evaluation', 'maxmatchdistance'))
-    if read_ini(path, 'evaluation', 'miniousimilarity') != '':
-        cutoff_iou = float(read_ini(path, 'evaluation', 'miniousimilarity'))
-    if read_ini(path, 'evaluation', 'drawevaluationdetails') != '':
-        draw_evaluation_details = float(read_ini(path, 'evaluation', 'drawevaluationdetails'))
-    if read_ini(path, 'evaluation', 'ignoredframesize') != '':
-        ignored_frame_size = float(read_ini(path, 'evaluation', 'ignoredframesize'))
-    if read_ini(path, 'details', 'fill_markers') != '':
-        fill_markers = bool(read_ini(path, 'details', 'fill_markers'))
-    if read_ini(path, 'details', 'markersize') != '':
-        markersize = int(read_ini(path, 'details', 'markersize'))
+    if not loaded_ini:
+        loaded_ini = True
+        if read_ini(path, 'evaluation', 'maxmatchdistance') != '':
+            cutoff = float(read_ini(path, 'evaluation', 'maxmatchdistance'))
+        if read_ini(path, 'evaluation', 'miniousimilarity') != '':
+            cutoff_iou = float(read_ini(path, 'evaluation', 'miniousimilarity'))
+        if read_ini(path, 'evaluation', 'drawevaluationdetails') != '':
+            draw_evaluation_details = float(read_ini(path, 'evaluation', 'drawevaluationdetails'))
+        if read_ini(path, 'evaluation', 'ignoredframesize') != '':
+            ignored_frame_size = float(read_ini(path, 'evaluation', 'ignoredframesize'))
+        if read_ini(path, 'details', 'fill_markers') != '':
+            fill_markers = bool(read_ini(path, 'details', 'fill_markers'))
+        if read_ini(path, 'details', 'markersize') != '':
+            markersize = int(read_ini(path, 'details', 'markersize'))
 
 
 def run_script(args):
@@ -242,8 +261,10 @@ def run_script(args):
         if read_ini(CONFIG_FILE,'evaluation','outputevaluationdetails') != '':
             output_evaluation_details = float(read_ini(CONFIG_FILE,'evaluation','outputevaluationdetails'))
         if read_ini(CONFIG_FILE,'plot','terminal') != '':
-            terminal_type = read_ini(CONFIG_FILE,'plot','terminal').strip()    
-        
+            terminal_type = read_ini(CONFIG_FILE,'plot','terminal').strip()
+        if read_ini(CONFIG_FILE, 'evaluation', 'ignoredframesize') != '':
+            ignored_frame_size = float(read_ini(CONFIG_FILE, 'evaluation', 'ignoredframesize'))
+
         debug_center.configure(CONFIG_FILE)
         
         output_summary_stdout = 0
@@ -309,8 +330,16 @@ def run_script(args):
         debug_center.show_in_console(None,"Progress","Evaluating segmentation...")
         stats = []
         segmentation_details = []
+        image_sizes = {}
+
+        if output_evaluation_details and draw_evaluation_details:
+            overlord = draw_details.EvaluationDetails(SEGDETAILS_SUFFIX, input_file_part)
+            image_sizes = draw_details.get_images_sizes(overlord, input_directory)
+
         for frame in list_of_frames:
-            (cr,cg,corr,fp,fn) = calculate_stats_segmentation(data_per_frame[frame][0],data_per_frame[frame][1])
+            image_size = image_sizes.get(frame, (100000, 100000))
+
+            (cr,cg,corr,fp,fn) = calculate_stats_segmentation(data_per_frame[frame][0],data_per_frame[frame][1], image_size)
             segmentation_details += (corr,fp,fn)
             stats.append((frame,(cr,cg,len(corr),len(fp),len(fn))))
 
