@@ -1,5 +1,5 @@
 EVALUATION TOOL FOR CELL SEGMENTATION AND TRACKING
-version 1.1.0
+version 1.2.0
 
 1a. Requirements
 - Python version 2.7, 3.7

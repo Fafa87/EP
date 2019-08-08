@@ -224,7 +224,7 @@ def get_images_sizes(overlord, directory_images):
 def run(overlord, directory_images, directory_output, desired_output_file_prefix = None):
     global output_file_prefix
 
-    if not os.path.exists(directory_output):
+    if directory_output and not os.path.exists(directory_output):
         os.makedirs(directory_output)
 
     data = overlord.read_data()

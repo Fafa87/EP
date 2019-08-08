@@ -47,5 +47,5 @@ setuptools.setup(
             "pytest"
         ],
         url="https://github.com/Fafa87/EP",
-        version="1.1.0"
+        version="1.2.0"
 )

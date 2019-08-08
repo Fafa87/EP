@@ -1,5 +1,5 @@
 # EVALUATION TOOL FOR CELL SEGMENTATION AND TRACKING
-version 1.1.0
+version 1.2.0
 
 [![Build Status](https://travis-ci.org/Fafa87/EP.svg?branch=master)](https://travis-ci.org/Fafa87/EP)
 
