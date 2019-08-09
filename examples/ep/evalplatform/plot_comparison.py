@@ -246,7 +246,7 @@ def load_general_ini(path):
         if read_ini(path, 'evaluation', 'ignoredframesize') != '':
             ignored_frame_size = float(read_ini(path, 'evaluation', 'ignoredframesize'))
         if read_ini(path, 'details', 'fill_markers') != '':
-            fill_markers = bool(read_ini(path, 'details', 'fill_markers'))
+            fill_markers = bool(int(read_ini(path, 'details', 'fill_markers')))
         if read_ini(path, 'details', 'markersize') != '':
             markersize = int(read_ini(path, 'details', 'markersize'))
 
