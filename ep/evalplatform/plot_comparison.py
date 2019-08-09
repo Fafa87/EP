@@ -195,6 +195,10 @@ def calculate_metrics_segmentation(params):
     """
     (cell_count_results, cell_count_ground_truth, correspondences, false_positives, false_negatives) = params
     prf = calculate_precision_recall_F_metrics(cell_count_results, cell_count_ground_truth, correspondences)
+
+    if cell_count_ground_truth == 0:
+        return tuple([0]) + prf
+
     return tuple([float(cell_count_results)/cell_count_ground_truth]) + prf
 
 def calculate_stats_tracking(params_last,last_mapping,params_new,new_mapping):
@@ -315,7 +319,7 @@ def run_script(args):
             # filter data without tracking GT
             if tracking:
                 ground_truth_data = [(f,cell) for (f,cell) in ground_truth_data if cell.has_tracking_data() ]
-            list_of_frames = sorted(set([item[0] for item in ground_truth_data]) & set([item[0] for item in results_data[1]]))
+            list_of_frames = sorted(set([item[0] for item in ground_truth_data]) | set([item[0] for item in results_data[1]]))
             
             if(list_of_frames == []):
                 debug_center.show_in_console(None,"Error","ERROR: No ground truth data! Intersection of ground truth and results is empty!")

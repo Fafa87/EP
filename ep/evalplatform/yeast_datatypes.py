@@ -52,10 +52,13 @@ class CellOccurence:
     def overlap(self, cell_b):
         if self.has_contour_data() and cell_b.has_contour_data():
             slices_overlap = slices_intersection(self.mask_slice, cell_b.mask_slice)
-            slice_relative_1 = slices_relative(self.mask_slice, slices_overlap)
-            slice_relative_2 = slices_relative(cell_b.mask_slice, slices_overlap)
-            overlap = self.mask[slice_relative_1] & cell_b.mask[slice_relative_2]
-            return np.count_nonzero(overlap)
+            if slices_overlap is not None:
+                slice_relative_1 = slices_relative(self.mask_slice, slices_overlap)
+                slice_relative_2 = slices_relative(cell_b.mask_slice, slices_overlap)
+                overlap = self.mask[slice_relative_1] & cell_b.mask[slice_relative_2]
+                return np.count_nonzero(overlap)
+            else:
+                return 0
         return None
 
     def iou(self, cell_b):
