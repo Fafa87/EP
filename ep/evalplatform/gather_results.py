@@ -33,7 +33,7 @@ def join4(path):
     imC = Image.open(os.path.join(path,"M3.png"))
     imD = Image.open(os.path.join(path,"M4.png"))
     image_size = imA.size
-    half_size = (image_size[0]/2,image_size[1]/2)
+    half_size = (image_size[0]//2,image_size[1]//2)
     
     imA = imA.resize(half_size,Image.ANTIALIAS)
     imB = imB.resize(half_size,Image.ANTIALIAS)
@@ -58,7 +58,7 @@ def join6(path):
     if os.path.isfile(os.path.join(path,"M6.png")):
         imF = Image.open(os.path.join(path,"M6.png"))
     image_size = imA.size
-    half_size = (image_size[0]/2,image_size[1]/2)
+    half_size = (image_size[0]//2,image_size[1]//2)
     
     imA = imA.resize(half_size,Image.ANTIALIAS)
     imB = imB.resize(half_size,Image.ANTIALIAS)
@@ -113,6 +113,11 @@ def create_additional_plots(title, name_data_paths, set_number, output_name):
     """
     try:
         if name_data_paths == []:
+            return -1
+
+        if len(name_data_paths) > 50:
+            debug_center.show_in_console(None, "Warning",
+                                         ("WARNING: Too many plots given, merged plot would not make any sense."))
             return -1
             
         # Extract data from all the algorithms.
