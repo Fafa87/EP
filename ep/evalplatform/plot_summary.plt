@@ -36,6 +36,6 @@ set title plot_title font ",40"
 #===== PLOT SETTINGS =====#
 
 # generated dynamically
-#plot data_file index 0 title " Precision" with lines lw 2
-#	 ,data_file index 1 title "Recall" with lines lw 2 \
-#	 ,data_file index 2 title "F" with lines lw 2 \
+# plot data_file index 1 using 2:xtic(1) title "Precision" with lines lw 2 \
+#	 ,data_file index 2 using 2:xtic(1) title "Recall" with lines lw 2 \
+#	 ,data_file index 3 using 2:xtic(1) title "F" with lines lw 2

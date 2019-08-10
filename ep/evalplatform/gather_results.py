@@ -147,7 +147,9 @@ def create_additional_plots(title, name_data_paths, set_number, output_name):
         shutil.copy(plt_filename,plt_filename_mod)
         plt_file = open(plt_filename_mod,"a")
         plt_file.write("\n")
-        plt_file.write("plot " + ",".join(["data_file index {0} title \"{1}\" with lines lw 2".format(i,name) for (i,name) in enumerate(names)]))
+        plt_file.write("plot " + ",".join(
+            ["data_file index {0} using 2:xtic(1) title \"{1}\" with lines lw 2".format(i, name)
+             for (i, name) in enumerate(names)]))
         plt_file.write("\n")
         plt_file.close()
         # Run gluplot and plot it!

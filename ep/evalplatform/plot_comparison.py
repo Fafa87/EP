@@ -321,7 +321,9 @@ def run_script(args):
             # filter data without tracking GT
             if tracking:
                 ground_truth_data = [(f,cell) for (f,cell) in ground_truth_data if cell.has_tracking_data() ]
-            list_of_frames = sorted(set([item[0] for item in ground_truth_data]) | set([item[0] for item in results_data[1]]))
+
+            # TODO use parameter assume_all_ground_truth evaluated
+            list_of_frames = sorted(set([item[0] for item in ground_truth_data]) & set([item[0] for item in results_data[1]]))
             
             if(list_of_frames == []):
                 debug_center.show_in_console(None,"Error","ERROR: No ground truth data! Intersection of ground truth and results is empty!")
