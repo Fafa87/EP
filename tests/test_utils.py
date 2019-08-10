@@ -26,10 +26,10 @@ class TestSlices(unittest.TestCase):
         self.assertEqual(s2, slices_intersection(s1, s2))
 
         s2 = (slice(13, 14), slice(0, 18))
-        self.assertEqual((slice(13, 10), slice(15, 17)), slices_intersection(s1, s2))
+        self.assertEqual(None, slices_intersection(s1, s2))
 
         s2 = (slice(0, 24), slice(0, 3))
-        self.assertEqual((slice(0, 10), slice(15, 3)), slices_intersection(s1, s2))
+        self.assertEqual(None, slices_intersection(s1, s2))
 
     def test_slice_arithmetic(self):
         s1 = (slice(0, 10), slice(15, 17))
@@ -120,8 +120,8 @@ class TestReadWritePlot(unittest.TestCase):
 
     def setUp(self):
         self.filename = "testowy"
-        self.data_saved = "1 2\n3 5\n10 12\n\n\n1 20\n3 50\n10 120\n\n\n1 200\n3 500\n10 1200"
-        self.data_read = [[(1, 2), (3, 5), (10, 12)], [(1, 20), (3, 50), (10, 120)], [(1, 200), (3, 500), (10, 1200)]]
+        self.data_saved = '"1" 2\n"3" 5\n"10" 12\n\n\n"1" 20\n"3" 50\n"10" 120\n\n\n"1" 200\n"3" 500\n"10" 1200'
+        self.data_read = [[("1", 2), ("3", 5), ("10", 12)], [("1", 20), ("3", 50), ("10", 120)], [("1", 200), ("3", 500), ("10", 1200)]]
         opened_file = open(self.filename, "w")
         opened_file.writelines(self.data_saved)
         opened_file.close()

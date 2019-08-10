@@ -84,7 +84,7 @@ class CSVCellParser():
 
     def parse_line(self,line):
         self.set_line(line)
-        cell = CellOccurence(int(self.get_column("frame_nr")),int(self.get_column("cell_nr")),self.unique_id(line),
+        cell = CellOccurence(self.get_column("frame_nr"),int(self.get_column("cell_nr")),self.unique_id(line),
             (float(self.get_column("position_x")), float(self.get_column("position_y"))))
         cell.colour = self.cell_colour(line)
         return cell.frame_number, cell

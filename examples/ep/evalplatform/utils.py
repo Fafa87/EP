@@ -1,6 +1,7 @@
 import csv
 import os
 import re
+import shlex
 import stat
 import sys
 from functools import reduce
@@ -46,6 +47,10 @@ def slice_to_array(slice):
 
 
 def slices_intersection(slices1, slices2):
+    # Fast non-zero intersection check.
+    if slices1[0].start > slices2[0].stop or slices1[1].start > slices2[1].stop or \
+            slices2[0].start > slices1[0].stop or slices2[1].start > slices1[1].stop:
+        return None
     ys1 = slice_to_array(slices1[0])
     xs1 = slice_to_array(slices1[1])
     ys2 = slice_to_array(slices2[0])
@@ -208,7 +213,7 @@ def write_to_file(data_sets, path):
     data_set: [(f,val)] -> 1 2\n2 5\n3 8
     data_sets: [data_set] -> data1\n\n\ndata2
     """
-    data = map(lambda dataset: "\n".join([str(int(f)) + " " + str(val) for (f, val) in dataset]), data_sets)
+    data = map(lambda dataset: "\n".join(["\"" + str(f) + "\" " + str(val) for (f, val) in dataset]), data_sets)
     joined = "\n\n\n".join(data)
     opened_file = open(path, "w")
     opened_file.writelines(joined)
@@ -226,8 +231,8 @@ def read_from_file(path):
     joined = opened_file.read()
     opened_file.close()
 
-    return [[(float(line.split(" ")[0].replace("\"","")), float(line.split(" ")[1])) for line in dataset.split("\n")] for dataset in
-            joined.split("\n\n\n")]
+    datasets = [[shlex.split(line) for line in dataset.split("\n")] for dataset in joined.split("\n\n\n")]
+    return [[(tokens[0], float(tokens[1])) for tokens in dataset] for dataset in datasets]
 
 
 def read_ini(file_path, section, key):

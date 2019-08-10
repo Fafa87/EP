@@ -74,18 +74,20 @@ def read_results(path, parser, name):
 def write_to_file_tracking(stats, path):
     data_sets = ([],[],[])
     for (f,(p,r,ff)) in stats:
-        data_sets[0].append((f,p))
-        data_sets[1].append((f,r))
-        data_sets[2].append((f,ff))
+        f_short = str(f)[:20]
+        data_sets[0].append((f_short,p))
+        data_sets[1].append((f_short,r))
+        data_sets[2].append((f_short,ff))
     write_to_file(data_sets,path)
 
 def write_to_file_segmentation(stats, path):
     data_sets = ([],[],[],[])
     for (f,(a,b,c,d)) in stats:
-        data_sets[0].append((f,a))
-        data_sets[1].append((f,b))
-        data_sets[2].append((f,c))
-        data_sets[3].append((f,d))
+        f_short = str(f)[:20]
+        data_sets[0].append((f_short,a))
+        data_sets[1].append((f_short,b))
+        data_sets[2].append((f_short,c))
+        data_sets[3].append((f_short,d))
     write_to_file(data_sets,path)
     
 def write_to_file_printable(details, path):

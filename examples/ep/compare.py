@@ -30,7 +30,13 @@ if(len(sys.argv) < 3):
     print("".join(["Wrong number (" + str(len(sys.argv) - 1) + ") of arguments 1+2k required)."]))
     print("".join(sys.argv[1:]))
     print("".join(["Program usage: compare.py <results_folder> [<algorithm_subpath>]2+" ]))
+    print("".join(["Alternative usage: compare.py <results_folder> <file_path_with_rest_of_params>"]))
 else: 
+    # Unpack parameters if passed as separate file (e.g. compare many grid search results).
+    if len(sys.argv) == 3:
+        with open(sys.argv[2], "r") as f:
+            sys.argv = sys.argv[:2] + f.read().split("\n")
+
     debug_center.configure(CONFIG_FILE)
     algorithm_number = len(sys.argv)-2
     

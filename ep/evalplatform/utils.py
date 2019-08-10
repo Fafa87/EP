@@ -213,7 +213,7 @@ def write_to_file(data_sets, path):
     data_set: [(f,val)] -> 1 2\n2 5\n3 8
     data_sets: [data_set] -> data1\n\n\ndata2
     """
-    data = map(lambda dataset: "\n".join([str(int(f)) + " " + str(val) for (f, val) in dataset]), data_sets)
+    data = map(lambda dataset: "\n".join(["\"" + str(f) + "\" " + str(val) for (f, val) in dataset]), data_sets)
     joined = "\n\n\n".join(data)
     opened_file = open(path, "w")
     opened_file.writelines(joined)
