@@ -1,6 +1,7 @@
 import csv
 import os
 import re
+import shlex
 import stat
 import sys
 from functools import reduce
@@ -46,6 +47,10 @@ def slice_to_array(slice):
 
 
 def slices_intersection(slices1, slices2):
+    # Fast non-zero intersection check.
+    if slices1[0].start > slices2[0].stop or slices1[1].start > slices2[1].stop or \
+            slices2[0].start > slices1[0].stop or slices2[1].start > slices1[1].stop:
+        return None
     ys1 = slice_to_array(slices1[0])
     xs1 = slice_to_array(slices1[1])
     ys2 = slice_to_array(slices2[0])
@@ -142,7 +147,8 @@ def get_trailing_order(text, is_path=False):
         text = os.path.splitext(text)[0]
     reversed_name = text[::-1]
     m = re.search("\D", reversed_name + " ")
-    return reversed_name[:m.start()][::-1]
+    number = reversed_name[:m.start()][::-1]
+    return number if number else text
 
 
 def parse_file_order(order_object):
@@ -157,6 +163,21 @@ def parse_file_order(order_object):
         raise Exception("Order is neither str nor int: " + str(order_object))
 
     return order_normalized
+
+
+def setup_ploting_terminal(terminal_type, data_points, wide_plot):
+    if wide_plot:
+        good_width = max(1200, int(1200 / 80 * len(data_points)))
+    else:
+        good_width = 1200
+
+    if terminal_type != "svg":
+        term_set = "pngcairo size {0},800 linewidth 2 font \\\",22\\\"".format(good_width)
+        output_file_extension = ".png"
+    else:
+        term_set = "svg size {0},800 linewidth 2 font \\\",22\\\"".format(good_width)
+        output_file_extension = ".svg"
+    return term_set, output_file_extension
 
 
 def package_path(filename, quoted=1):
@@ -208,7 +229,7 @@ def write_to_file(data_sets, path):
     data_set: [(f,val)] -> 1 2\n2 5\n3 8
     data_sets: [data_set] -> data1\n\n\ndata2
     """
-    data = map(lambda dataset: "\n".join([str(int(f)) + " " + str(val) for (f, val) in dataset]), data_sets)
+    data = map(lambda dataset: "\n".join(["\"" + str(f) + "\" " + str(val) for (f, val) in dataset]), data_sets)
     joined = "\n\n\n".join(data)
     opened_file = open(path, "w")
     opened_file.writelines(joined)
@@ -226,8 +247,8 @@ def read_from_file(path):
     joined = opened_file.read()
     opened_file.close()
 
-    return [[(float(line.split(" ")[0].replace("\"","")), float(line.split(" ")[1])) for line in dataset.split("\n")] for dataset in
-            joined.split("\n\n\n")]
+    datasets = [[shlex.split(line) for line in dataset.split("\n")] for dataset in joined.split("\n\n\n")]
+    return [[(tokens[0], float(tokens[1])) for tokens in dataset] for dataset in datasets]
 
 
 def read_ini(file_path, section, key):

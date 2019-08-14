@@ -33,7 +33,7 @@ def join4(path):
     imC = Image.open(os.path.join(path,"M3.png"))
     imD = Image.open(os.path.join(path,"M4.png"))
     image_size = imA.size
-    half_size = (image_size[0]/2,image_size[1]/2)
+    half_size = (image_size[0]//2,image_size[1]//2)
     
     imA = imA.resize(half_size,Image.ANTIALIAS)
     imB = imB.resize(half_size,Image.ANTIALIAS)
@@ -58,7 +58,7 @@ def join6(path):
     if os.path.isfile(os.path.join(path,"M6.png")):
         imF = Image.open(os.path.join(path,"M6.png"))
     image_size = imA.size
-    half_size = (image_size[0]/2,image_size[1]/2)
+    half_size = (image_size[0]//2,image_size[1]//2)
     
     imA = imA.resize(half_size,Image.ANTIALIAS)
     imB = imB.resize(half_size,Image.ANTIALIAS)
@@ -114,6 +114,11 @@ def create_additional_plots(title, name_data_paths, set_number, output_name):
     try:
         if name_data_paths == []:
             return -1
+
+        if len(name_data_paths) > 50:
+            debug_center.show_in_console(None, "Warning",
+                                         ("WARNING: Too many plots given, merged plot would not make any sense."))
+            return -1
             
         # Extract data from all the algorithms.
         name_data = [ (name, read_from_file(path)) for (name,path) in name_data_paths]
@@ -125,15 +130,8 @@ def create_additional_plots(title, name_data_paths, set_number, output_name):
         temp_file = "create_additional_plots.tmp"
         write_to_file(datasets,temp_file)
         
-        # Setup terminal type.
-        term_set = ""
-        output_file_extension = ""
-        if terminal_type != "svg" :
-            term_set = "pngcairo size 1200,800 linewidth 2 font \\\",22\\\"" 
-            output_file_extension = ".png"
-        else:
-            term_set = "svg size 1200,800 linewidth 2 font \\\",22\\\"" 
-            output_file_extension = ".svg"
+        # Setup terminal.
+        term_set, output_file_extension = setup_ploting_terminal(terminal_type, datasets[0], wide_plots)
         
         # Alter to show all the collected data.
         plt_filename = package_path(SUMMARY_GNUPLOT_FILE,0)
@@ -142,7 +140,9 @@ def create_additional_plots(title, name_data_paths, set_number, output_name):
         shutil.copy(plt_filename,plt_filename_mod)
         plt_file = open(plt_filename_mod,"a")
         plt_file.write("\n")
-        plt_file.write("plot " + ",".join(["data_file index {0} title \"{1}\" with lines lw 2".format(i,name) for (i,name) in enumerate(names)]))
+        plt_file.write("plot " + ",".join(
+            ["data_file index {0} using 2:xtic(1) title \"{1}\" with lines lw 2".format(i, name)
+             for (i, name) in enumerate(names)]))
         plt_file.write("\n")
         plt_file.close()
         # Run gluplot and plot it!
@@ -211,7 +211,7 @@ def merge_images(images_paths,results_folder,output):
     return 0
         
 def run_script(args):
-    global terminal_type
+    global terminal_type, wide_plots
     
     if(len(args) % 2 == 0 and len(args) < 4):
         print("".join(["Wrong number (" + str(len(args) - 1) + ") of arguments (1+2(1+k) required)."]))
@@ -221,7 +221,9 @@ def run_script(args):
         debug_center.configure(CONFIG_FILE)
         
         if read_ini(CONFIG_FILE,'plot','terminal') != '':
-            terminal_type = read_ini(CONFIG_FILE,'plot','terminal').strip()    
+            terminal_type = read_ini(CONFIG_FILE,'plot','terminal').strip()
+        if read_ini(CONFIG_FILE, 'plot', 'wideplots') != '':
+            wide_plots = bool(int(read_ini(CONFIG_FILE, 'plot', 'wideplots')))
         
         algorithm_number = (len(args)-1) // 2
         

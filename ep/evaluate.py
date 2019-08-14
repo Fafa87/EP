@@ -261,17 +261,11 @@ if __name__ == '__main__':
     created_details = find_all_created_directories(algo[0])
     
     # move files into output folders 
-    for gt_file in gt_files:
-        new_path = determine_output_filepath(gt_file,OUTPUT_FOLDER) #os.path.basename(gt_file)
-        if(os.path.isfile(new_path)):
+    for eval_file in set(gt_files + algo_files):
+        new_path = determine_output_filepath(eval_file, OUTPUT_FOLDER)  # os.path.basename(gt_file)
+        if os.path.isfile(new_path):
             os.remove(new_path)
-        os.renames(gt_file, new_path)
-        
-    for algo_file in algo_files:
-        new_path = determine_output_filepath(algo_file,OUTPUT_FOLDER) #os.path.basename(algo_file)
-        if(os.path.isfile(new_path)):
-            os.remove(new_path)
-        os.renames(algo_file, new_path)
+        os.renames(eval_file, new_path)
         
     # move evaluation details drawings
     for directory in created_details:

@@ -1,7 +1,14 @@
 # EVALUATION TOOL FOR CELL SEGMENTATION AND TRACKING
-version 1.2.0
 
-[![Build Status](https://travis-ci.org/Fafa87/EP.svg?branch=master)](https://travis-ci.org/Fafa87/EP)
+[![Build Status](https://travis-ci.org/Fafa87/EP.svg?branch=master)](https://travis-ci.org/Fafa87/EP) 
+[![GitHub release](https://img.shields.io/github/release/Fafa87/EP.svg)](https://GitHub.com/Fafa87/EP/releases/) 
+
+[![PyPI version](https://img.shields.io/pypi/v/evalplatform.svg)](https://pypi.org/project/evalplatform/) 
+[![PyPi](https://img.shields.io/pypi/pyversions/evalplatform)](https://pypi.org/project/evalplatform/) 
+[![Platform](https://img.shields.io/badge/platform-windows%20%7C%20osx%20%7C%20ubuntu-lightgrey)]()
+
+
+
 
 ## Requirements
 - Python version 2.7, 3.7
