@@ -164,6 +164,21 @@ def parse_file_order(order_object):
     return order_normalized
 
 
+def setup_ploting_terminal(terminal_type, data_points, wide_plot):
+    if wide_plot:
+        good_width = max(1200, int(1200 / 80 * len(data_points)))
+    else:
+        good_width = 1200
+
+    if terminal_type != "svg":
+        term_set = "pngcairo size {0},800 linewidth 2 font \\\",22\\\"".format(good_width)
+        output_file_extension = ".png"
+    else:
+        term_set = "svg size {0},800 linewidth 2 font \\\",22\\\"".format(good_width)
+        output_file_extension = ".svg"
+    return term_set, output_file_extension
+
+
 def package_path(filename, quoted=1):
     """
     Return relative (from cwd) path to file in package folder.

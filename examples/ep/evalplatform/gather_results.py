@@ -130,15 +130,8 @@ def create_additional_plots(title, name_data_paths, set_number, output_name):
         temp_file = "create_additional_plots.tmp"
         write_to_file(datasets,temp_file)
         
-        # Setup terminal type.
-        term_set = ""
-        output_file_extension = ""
-        if terminal_type != "svg" :
-            term_set = "pngcairo size 1200,800 linewidth 2 font \\\",22\\\"" 
-            output_file_extension = ".png"
-        else:
-            term_set = "svg size 1200,800 linewidth 2 font \\\",22\\\"" 
-            output_file_extension = ".svg"
+        # Setup terminal.
+        term_set, output_file_extension = setup_ploting_terminal(terminal_type, datasets[0], wide_plots)
         
         # Alter to show all the collected data.
         plt_filename = package_path(SUMMARY_GNUPLOT_FILE,0)
@@ -218,7 +211,7 @@ def merge_images(images_paths,results_folder,output):
     return 0
         
 def run_script(args):
-    global terminal_type
+    global terminal_type, wide_plots
     
     if(len(args) % 2 == 0 and len(args) < 4):
         print("".join(["Wrong number (" + str(len(args) - 1) + ") of arguments (1+2(1+k) required)."]))
@@ -228,7 +221,9 @@ def run_script(args):
         debug_center.configure(CONFIG_FILE)
         
         if read_ini(CONFIG_FILE,'plot','terminal') != '':
-            terminal_type = read_ini(CONFIG_FILE,'plot','terminal').strip()    
+            terminal_type = read_ini(CONFIG_FILE,'plot','terminal').strip()
+        if read_ini(CONFIG_FILE, 'plot', 'wideplots') != '':
+            wide_plots = bool(int(read_ini(CONFIG_FILE, 'plot', 'wideplots')))
         
         algorithm_number = (len(args)-1) // 2
         
