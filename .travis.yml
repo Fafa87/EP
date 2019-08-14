@@ -13,5 +13,7 @@ sudo: false
 before_install:
   - sudo apt-get install python-tk
   - sudo apt-get install python3-tk
+install:
+  - pip install -r requirements.txt
 script:
-  - python setup.py test
+  - pytest
