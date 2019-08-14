@@ -27,7 +27,7 @@ set yrange [0.5:1]
 set mytics 5
 set ylabel grid_ylabel
 
-set xtics grid_xtics font ",14" nomirror rotate by 90 offset character 0,-0.5 
+set xtics grid_xtics font ",14" nomirror
 set mxtics grid_mxtics
 set xlabel grid_xlabel
 

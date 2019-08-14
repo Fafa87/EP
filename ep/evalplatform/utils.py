@@ -147,7 +147,8 @@ def get_trailing_order(text, is_path=False):
         text = os.path.splitext(text)[0]
     reversed_name = text[::-1]
     m = re.search("\D", reversed_name + " ")
-    return reversed_name[:m.start()][::-1]
+    number = reversed_name[:m.start()][::-1]
+    return number if number else text
 
 
 def parse_file_order(order_object):
