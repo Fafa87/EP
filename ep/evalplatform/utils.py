@@ -177,7 +177,7 @@ def setup_ploting_terminal(terminal_type, data_points, wide_plot):
     else:
         term_set = "svg size {0},800 linewidth 2 font \\\",22\\\"".format(good_width)
         output_file_extension = ".svg"
-    return term_set, output_file_extension
+    return term_set, output_file_extension, ""
 
 
 def package_path(filename, quoted=1):

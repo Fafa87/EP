@@ -376,12 +376,19 @@ def run_script(args):
         write_to_file_segmentation([(stat[0],calculate_metrics_segmentation(stat[1])) for stat in stats], tmp_path)
 
         # Setup terminal.
-        term_set, output_file_extension = setup_ploting_terminal(terminal_type, stats, wide_plots)
+        term_set, output_file_extension, additional_options = setup_ploting_terminal(terminal_type, stats, wide_plots)
 
         plot_path_no_ext = os.path.splitext(plot_path)[0]
         plot_file = package_path(SEGMENTATION_GNUPLOT_FILE)
 
-        ploting= "gnuplot -e " + "\"data_file='{}';plot_title='{}';output_file='{}';set terminal {};output_file_extension='{}';\"".format(tmp_path,algorithm_name,plot_path_no_ext,term_set,output_file_extension) + " " + plot_file
+        gnuplot_setup_script = "\"data_file='{}';" \
+                               "plot_title='{}';" \
+                               "output_file='{}';" \
+                               "set terminal {};" \
+                               "output_file_extension='{}';\"".format(tmp_path,algorithm_name,plot_path_no_ext,
+                                                                      term_set,output_file_extension, additional_options)
+
+        ploting= "gnuplot -e " + gnuplot_setup_script + " " + plot_file
         os.system(ploting)
         debug_center.show_in_console(None,"Progress","Done ploting segmentation results...")
 
