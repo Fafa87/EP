@@ -3,6 +3,7 @@ import sys
 import os
 from itertools import *
 
+from ep.evalplatform.plotting import Plotter
 from ep.evalplatform.utils import*
 from ep.evalplatform.parsers import*
 from ep.evalplatform.parsers_image import*
@@ -375,14 +376,11 @@ def run_script(args):
         debug_center.show_in_console(None,"Progress","Ploting segmentation results...")
         write_to_file_segmentation([(stat[0],calculate_metrics_segmentation(stat[1])) for stat in stats], tmp_path)
 
-        # Setup terminal.
-        term_set, output_file_extension = setup_ploting_terminal(terminal_type, stats, wide_plots)
-
-        plot_path_no_ext = os.path.splitext(plot_path)[0]
         plot_file = package_path(SEGMENTATION_GNUPLOT_FILE)
+        with Plotter(terminal_type, plot_file, algorithm_name) as plotter:
+            plotter.setup_ploting_area(wide_plots, stats)
+            plotter.plot_it(tmp_path, plot_path)
 
-        ploting= "gnuplot -e " + "\"data_file='{}';plot_title='{}';output_file='{}';set terminal {};output_file_extension='{}';\"".format(tmp_path,algorithm_name,plot_path_no_ext,term_set,output_file_extension) + " " + plot_file
-        os.system(ploting)
         debug_center.show_in_console(None,"Progress","Done ploting segmentation results...")
 
         if output_evaluation_details:
@@ -444,11 +442,11 @@ def run_script(args):
             debug_center.show_in_console(None,"Progress","Ploting tracking results...")
             write_to_file_tracking([(stat[0],calculate_precision_recall_F_metrics(*stat[1])) for stat in stats_tracking], tmp_path)
 
-            plot_path_no_ext = os.path.splitext(plot_path)[0]
             plot_file = package_path(TRACKING_GNUPLOT_FILE)
-            ploting= "gnuplot -e " + "\"data_file='{}';plot_title='{}';output_file='{}';set terminal {};output_file_extension='{}';\"".format(tmp_path,algorithm_name,plot_path_no_ext,term_set,output_file_extension) + " " + plot_file
+            with Plotter(terminal_type, plot_file, algorithm_name) as plotter:
+                plotter.setup_ploting_area(wide_plots, stats_tracking)
+                plotter.plot_it(tmp_path, plot_path)
 
-            os.system(ploting)
             debug_center.show_in_console(None,"Progress","Done ploting tracking results...")
 
             if output_evaluation_details:

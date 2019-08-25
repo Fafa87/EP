@@ -2,7 +2,11 @@
 #output_file = <filename_without_extension>
 #output_file_extension = ".svg"|".png"
 #set terminal (svg | pngcairo) size 1200,800 linewidth 2 font ",22" # (depends on evaluation.ini)
-#plot_title = <plot_title>
+#data_file = <path_to_tmp_file_with_data>
+
+if (!exists("plot_title")) plot_title=""
+if (!exists("xlabel_lines")) xlabel_lines=1
+pad(num, label_col) = ("\n\n\n\n"[:(int(num) % xlabel_lines)]) . stringcolumn(label_col)
 
 #===== GRID SETTINGS =====#
 grid_xtics=1; 
@@ -27,15 +31,12 @@ set yrange [0.5:1]
 set mytics 5
 set ylabel grid_ylabel
 
-set xtics grid_xtics font ",14" nomirror
+set xtics grid_xtics font ",12" offset character 0,0.25 
 set mxtics grid_mxtics
 set xlabel grid_xlabel
 
 set title plot_title font ",40"
 
-#===== PLOT SETTINGS =====#
-
+#===== PLOT DATA =====#
 # generated dynamically
-# plot data_file index 1 using 2:xtic(1) title "Precision" with lines lw 2 \
-#	 ,data_file index 2 using 2:xtic(1) title "Recall" with lines lw 2 \
-#	 ,data_file index 3 using 2:xtic(1) title "F" with lines lw 2
+# similar way as in plot_segmentation

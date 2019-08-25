@@ -4,6 +4,7 @@ import shutil
 import subprocess
 from PIL import Image
 
+from ep.evalplatform.plotting import Plotter
 from ep.evalplatform.utils import*
 from ep.evalplatform.create_report import create_report, create_sensible_report
 images_sufixes = [SEGPLOT_SUFFIX,TRACKPLOT_SUFFIX]
@@ -127,34 +128,20 @@ def create_additional_plots(title, name_data_paths, set_number, output_name):
         names, algo_datasets = zip(*name_data)
         datasets = [datasets[set_number] for datasets in algo_datasets]
     
-        temp_file = "create_additional_plots.tmp"
-        write_to_file(datasets,temp_file)
-        
-        # Setup terminal.
-        term_set, output_file_extension = setup_ploting_terminal(terminal_type, datasets[0], wide_plots)
-        
-        # Alter to show all the collected data.
-        plt_filename = package_path(SUMMARY_GNUPLOT_FILE,0)
-        plt_filename_mod = SUMMARY_GNUPLOT_FILE + ".tmp"
-        
-        shutil.copy(plt_filename,plt_filename_mod)
-        plt_file = open(plt_filename_mod,"a")
-        plt_file.write("\n")
-        plt_file.write("plot " + ",".join(
-            ["data_file index {0} using 2:xtic(1) title \"{1}\" with lines lw 2".format(i, name)
-             for (i, name) in enumerate(names)]))
-        plt_file.write("\n")
-        plt_file.close()
-        # Run gluplot and plot it!
-        plot_path_no_ext = os.path.splitext(output_name)[0]
-        debug_center.show_in_console(None,"Progress","".join(["Ploting " + output_name +"..."]))
-        plot_file = plt_filename_mod
-        ploting= "gnuplot -e " + "\"data_file='{}';plot_title='{}';output_file='{}';set terminal {};output_file_extension='{}';\"".format(temp_file,title,plot_path_no_ext,term_set,output_file_extension) + " " + plot_file
-        os.system(ploting)
+        tmp_file = "create_additional_plots.tmp"
+        write_to_file(datasets,tmp_file)
+
+        plt_filename = package_path(SUMMARY_GNUPLOT_FILE, 0)
+        with Plotter(terminal_type, plt_filename, title) as plotter:
+            debug_center.show_in_console(None, "Progress", "".join(["Ploting " + output_name + "..."]))
+            plotter.setup_ploting_area(wide_plots, datasets[0])
+            plotter.use_generic_plots(names)
+            plotter.plot_it(tmp_file, output_name)
+
         debug_center.show_in_console(None,"Progress","".join(["Ploting done..."]))
+
         # Clean up the mess
-        os.remove(plt_filename_mod);
-        os.remove(temp_file);
+        os.remove(tmp_file)
         return 0
         
     except IOError as e:
