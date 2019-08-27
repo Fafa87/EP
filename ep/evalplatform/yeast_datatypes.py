@@ -1,5 +1,6 @@
 import numpy as np
 from cached_property import cached_property
+
 from .utils import slices_intersection, slices_relative, parse_file_order
 
 
@@ -88,7 +89,8 @@ class CellOccurence:
         return self.frame_number == other.frame_number and self.get_id() == other.get_id() and self.position == other.position and self.colour == other.colour
 
     def __str__(self):
-        return "frame={0},id={1},position={2},color={3}".format(self.frame_number, self.get_id(), self.position, self.colour)
+        return "frame={0},id={1},position={2},color={3}".format(self.frame_number, self.get_id(), self.position,
+                                                                self.colour)
 
 
 class TrackingLink(object):
@@ -182,7 +184,8 @@ class SegmentationResult(EvaluationDetail):
 
     @staticmethod
     def csv_headers():
-        return EvaluationDetail.csv_headers() + ["GT_id", "GT_pos_x", "GT_pos_y", "Algo_id", "Algo_pos_x", "Algo_pos_y", "IOU"]
+        return EvaluationDetail.csv_headers() + ["GT_id", "GT_pos_x", "GT_pos_y", "Algo_id", "Algo_pos_x", "Algo_pos_y",
+                                                 "IOU"]
 
     def csv_record(self):
         record = EvaluationDetail.csv_record(self)

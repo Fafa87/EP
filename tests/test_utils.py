@@ -5,11 +5,11 @@ from ep.evalplatform.utils import *
 
 class TestSlices(unittest.TestCase):
     def test_slice_intersect_inclusion(self):
-        s1 = (slice(0, 10), slice(15,17))
-        s2 = (slice(0, 10), slice(15,17))
+        s1 = (slice(0, 10), slice(15, 17))
+        s2 = (slice(0, 10), slice(15, 17))
         self.assertEqual(s1, slices_intersection(s1, s2))
 
-        s2 = (slice(0, 15), slice(15,33))
+        s2 = (slice(0, 15), slice(15, 33))
         self.assertEqual(s1, slices_intersection(s1, s2))
 
         s2 = (slice(2, 7), slice(15, 16))
@@ -121,7 +121,8 @@ class TestReadWritePlot(unittest.TestCase):
     def setUp(self):
         self.filename = "testowy"
         self.data_saved = '"1" 2\n"3" 5\n"10" 12\n\n\n"1" 20\n"3" 50\n"10" 120\n\n\n"1" 200\n"3" 500\n"10" 1200'
-        self.data_read = [[("1", 2), ("3", 5), ("10", 12)], [("1", 20), ("3", 50), ("10", 120)], [("1", 200), ("3", 500), ("10", 1200)]]
+        self.data_read = [[("1", 2), ("3", 5), ("10", 12)], [("1", 20), ("3", 50), ("10", 120)],
+                          [("1", 200), ("3", 500), ("10", 1200)]]
         opened_file = open(self.filename, "w")
         opened_file.writelines(self.data_saved)
         opened_file.close()

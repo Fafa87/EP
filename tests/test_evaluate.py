@@ -1,7 +1,3 @@
-import os
-import unittest
-
-import imageio
 import numpy as np
 
 from ep import evaluate

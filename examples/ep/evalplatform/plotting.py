@@ -51,6 +51,8 @@ class Plotter:
                  for (i, name) in enumerate(names)]))
             plt_file.write("\n")
 
+        self.temp_paths.append(plt_filename_modified)
+
     def plot_it(self, data_file, output_plot_path):
         plot_path_no_ext = os.path.splitext(output_plot_path)[0]
         variables = {"data_file": data_file, "plot_title": self.title, "output_file": plot_path_no_ext,

@@ -4,9 +4,10 @@ import sys
 
 measure_type = "F:"
 
-def create_report(summary_file_path,precision,format,output_file):
+
+def create_report(summary_file_path, precision, format, output_file):
     global measure_type
-    summary_file = open(summary_file_path,"rU")
+    summary_file = open(summary_file_path, "rU")
     data = summary_file.readlines()
 
     all_algo_results = []
@@ -33,25 +34,27 @@ def create_report(summary_file_path,precision,format,output_file):
         measure_f = [dd for dd in d[1:] if measure_type in dd or len(dd.split(":")[1].strip()) == 0]
         measures = [m.split(":")[0].strip() for m in measure_f[::2]]
         values = [float(m.split(":")[1]) for m in measure_f[1::2]]
-        measure_value = list(zip(measures,values))
-        algo_results_parsed.append((algo_name,measure_value))
-    
+        measure_value = list(zip(measures, values))
+        algo_results_parsed.append((algo_name, measure_value))
+
     # output report
     if format == "csv":
         measures = [a[0] for a in algo_results_parsed[0][1]]
-        output = open(output_file,"w")
+        output = open(output_file, "w")
         output.writelines("Measure;" + ";".join([a[0] for a in algo_results_parsed]) + "\n")
         for m in measures:
-            measure_line = m + ";" 
-            values = [[mv for (mn,mv) in a[1] if mn == m][0] for a in algo_results_parsed]
-            output.writelines(measure_line + ";".join([("{:." + str(precision) + "f}").format(a) for a in values]) + "\n")
+            measure_line = m + ";"
+            values = [[mv for (mn, mv) in a[1] if mn == m][0] for a in algo_results_parsed]
+            output.writelines(
+                measure_line + ";".join([("{:." + str(precision) + "f}").format(a) for a in values]) + "\n")
         output.close()
 
-def create_sensible_report(summary_file_path,precision,output_file):
+
+def create_sensible_report(summary_file_path, precision, output_file):
     all_algo_results = []
     algo_results = []
 
-    with open(summary_file_path,"r") as summary_file:
+    with open(summary_file_path, "r") as summary_file:
         for line in summary_file:
             line = line.strip()
             if not line:
@@ -72,7 +75,7 @@ def create_sensible_report(summary_file_path,precision,output_file):
         for entry in d:
             (name, value) = entry.split(":")
             value = value.strip()
-            if not value: # just key
+            if not value:  # just key
                 stack.append(name)
             else:
                 if name == "F":
@@ -88,6 +91,7 @@ def create_sensible_report(summary_file_path,precision,output_file):
         output.write(",".join(keys) + "\n")
         for algo in algo_dicts:
             output.write(",".join([algo[k] for k in keys]) + "\n")
+
 
 if __name__ == '__main__':
     if len(sys.argv) - 1 < 5:

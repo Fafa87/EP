@@ -1,8 +1,8 @@
-from abc import abstractmethod
 import imghdr
+from abc import abstractmethod
 
-import numpy as np
 import imageio
+import numpy as np
 import scipy.ndimage
 import scipy.ndimage.measurements as measures
 

@@ -2,7 +2,6 @@
 import os
 import unittest
 
-import imageio
 from numpy.testing import *
 
 from ep.evalplatform.parsers_image import *

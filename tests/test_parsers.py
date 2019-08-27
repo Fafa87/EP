@@ -30,10 +30,10 @@ class TestCellTracerParser(unittest.TestCase):
 class TestCellStarParser(unittest.TestCase):
     def setUp(self):
         self.input = ["FWEFWEF",
-                       '1,1,"287","339,23",0',
-                       '1,2,"186","301,0",0',
-                       '1,3,"255","122,1",0',
-                       '2,1,"256","122,1",3']
+                      '1,1,"287","339,23",0',
+                      '1,2,"186","301,0",0',
+                      '1,3,"255","122,1",0',
+                      '2,1,"256","122,1",3']
 
     def test_parse(self):
         cstar_parser = CellStarParser()
