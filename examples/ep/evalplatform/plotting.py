@@ -5,6 +5,7 @@ import shutil
 class Plotter:
     PLOT_WIDTH = 1200
     DATA_POINT_WIDTH = 80
+    DATA_POINTS_IN_ONE_LINE = 35
 
     def __init__(self, terminal_type, config_path, title):
         self.terminal_type = terminal_type
@@ -21,10 +22,12 @@ class Plotter:
             os.remove(file_path)
 
     def setup_ploting_area(self, wide_plot, data_points=None):
+        xlabel_lines = 1
         if wide_plot and data_points:
             good_width = max(Plotter.PLOT_WIDTH, int(Plotter.PLOT_WIDTH / Plotter.DATA_POINT_WIDTH * len(data_points)))
         else:
             good_width = Plotter.PLOT_WIDTH
+            xlabel_lines = min(3, len(data_points) // Plotter.DATA_POINTS_IN_ONE_LINE + 1)
 
         if self.terminal_type != "svg":
             term_set = "pngcairo size {0},800 linewidth 2 font \\\",22\\\"".format(good_width)
@@ -32,7 +35,8 @@ class Plotter:
         else:
             term_set = "svg size {0},800 linewidth 2 font \\\",22\\\"".format(good_width)
             output_file_extension = ".svg"
-        self.gnuplot_options = {"terminal": term_set, "output_file_extension": output_file_extension}
+        self.gnuplot_options = {"terminal": term_set, "output_file_extension": output_file_extension,
+                                "xlabel_lines": xlabel_lines}
 
     def use_generic_plots(self, names):
         plt_filename_modified = self.plot_config_path + ".tmp"
@@ -49,12 +53,12 @@ class Plotter:
 
     def plot_it(self, data_file, output_plot_path):
         plot_path_no_ext = os.path.splitext(output_plot_path)[0]
-        gnuplot_setup_script = "\"data_file='{}';" \
-                               "plot_title='{}';" \
-                               "output_file='{}';" \
-                               "set terminal {};" \
-                               "output_file_extension='{}';\"".format(data_file, self.title, plot_path_no_ext,
-                                                                      self.gnuplot_options["terminal"],
-                                                                      self.gnuplot_options["output_file_extension"])
+        variables = {"data_file": data_file, "plot_title": self.title, "output_file": plot_path_no_ext,
+                     "xlabel_lines": self.gnuplot_options["xlabel_lines"],
+                     "output_file_extension": self.gnuplot_options["output_file_extension"]}
+        variables_string = "".join(["{}='{}';".format(*kv) for kv in variables.items()])
+
+        gnuplot_setup_script = "\"{}" \
+                               "set terminal {};\"".format(variables_string, self.gnuplot_options["terminal"])
         ploting = "gnuplot -e " + gnuplot_setup_script + " " + self.plot_config_path
         os.system(ploting)
