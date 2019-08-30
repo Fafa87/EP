@@ -44,8 +44,3 @@ class TestCellStarParser(unittest.TestCase):
                         CellOccurence(2, 1, 3, (256.0, 122.1))]
         self.assertSequenceEqual(correct2_out, output)
 
-
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromModule(sys.modules["__main__"])
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    os.system("pause")

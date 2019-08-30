@@ -324,8 +324,3 @@ class TestLabelImageParser(unittest.TestCase):
         res = self.parser.load_from_file(image2_path)
         validate_image1(res)
 
-
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromModule(sys.modules["__main__"])
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    os.system("pause")

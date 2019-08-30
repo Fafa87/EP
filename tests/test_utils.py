@@ -139,10 +139,3 @@ class TestReadWritePlot(unittest.TestCase):
         data = read_from_file(self.filename)
         self.assertEqual(data, self.data_read)
 
-
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromModule(sys.modules["__main__"])
-    # suite = unittest.TestLoader().loadTestsFromTestCase(TestReadWritePlot)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    # unittest.main()
-    os.system("pause")

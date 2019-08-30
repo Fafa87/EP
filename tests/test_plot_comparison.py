@@ -117,8 +117,3 @@ class TestColours(unittest.TestCase):
         # precision = 100%
         # recall = 71%
 
-
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromModule(sys.modules["__main__"])
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    os.system("pause")

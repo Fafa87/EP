@@ -1,4 +1,6 @@
+import sys
 import unittest
+import os
 
 from ep.evalplatform.debug import *
 
@@ -56,7 +58,7 @@ class TestDebugCenter(unittest.TestCase):
             self.debug_center.check_if_enabled(10, set(["sego"]))
 
     def setUp(self):
-        if (os.path.isfile(self.debug_center.log_file)):
+        if os.path.isfile(self.debug_center.log_file):
             os.remove(self.debug_center.log_file)
         self.debug_center = DebugCenter()
         self.debug_center.chosen_level = 1
@@ -64,11 +66,5 @@ class TestDebugCenter(unittest.TestCase):
         self.debug_center.possible_categories = set(["seg", "track", "merge"])
 
     def tearDown(self):
-        if (os.path.isfile(self.debug_center.log_file)):
+        if os.path.isfile(self.debug_center.log_file):
             os.remove(self.debug_center.log_file)
-
-
-if __name__ == '__main__':
-    suite = unittest.TestLoader().loadTestsFromModule(sys.modules["__main__"])
-    unittest.TextTestRunner(verbosity=2).run(suite)
-    os.system("pause")
