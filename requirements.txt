@@ -7,3 +7,4 @@ imageio>=2.2.0
 cached-property>=1.4.0
 attrdict
 fire
+mock

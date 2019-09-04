@@ -1,6 +1,9 @@
 from __future__ import division  # so that a / b == float(a) / b
 
+import fire
+
 from ep.evalplatform import draw_details
+from ep.evalplatform.compatibility import plot_comparison_legacy_parse
 from ep.evalplatform.parsers import *
 from ep.evalplatform.parsers_image import *
 from ep.evalplatform.plotting import Plotter
@@ -288,216 +291,230 @@ def load_general_ini(path):
         markersize = int(read_ini(path, 'details', 'markersize'))
 
 
-def run_script(args):
+def run_script(ground_truth_csv_file,
+               algorithm_results_csv_file, algorithm_results_type, algorithm_name="Algorithm",
+               ground_truth_seg_csv_file=None, ground_truth_special_parser=None,
+               input_directory=None, input_file_part="",
+               evaluate_tracking=True, output_summary_stdout=False):
     global ground_truth_parser, output_evaluation_details, wide_plots
 
-    if (len(args) < 4):
-        print("".join([
-                          "Parameters: \n<ground_truth_csv_file> {/SegOnly} {<ground_truth_type>} <algorithm_results_csv_file> <algorithm_results_type> [algorithm_name] [ground_truth_seg_csv_file]"]))
+    if ground_truth_special_parser is not None:
+        ground_truth_parser = input_type[ground_truth_parser]
+    ground_truth_seg_csv_file = ground_truth_seg_csv_file or ground_truth_csv_file
+
+    load_general_ini(CONFIG_FILE)
+    if read_ini(CONFIG_FILE, 'evaluation', 'outputevaluationdetails') != '':
+        output_evaluation_details = float(read_ini(CONFIG_FILE, 'evaluation', 'outputevaluationdetails'))
+    if read_ini(CONFIG_FILE, 'plot', 'terminal') != '':
+        terminal_type = read_ini(CONFIG_FILE, 'plot', 'terminal').strip()
+    if read_ini(CONFIG_FILE, 'plot', 'wideplots') != '':
+        wide_plots = bool(int(read_ini(CONFIG_FILE, 'plot', 'wideplots')))
+
+    debug_center.configure(CONFIG_FILE)
+
+    if algorithm_results_type not in input_type:
+        debug_center.show_in_console(None, "Error",
+                                     "ERROR: " + algorithm_results_type + " is not supported. There are supported types: " + str(
+                                         input_type))
+        sys.exit()
     else:
-        load_general_ini(CONFIG_FILE)
-        if read_ini(CONFIG_FILE, 'evaluation', 'outputevaluationdetails') != '':
-            output_evaluation_details = float(read_ini(CONFIG_FILE, 'evaluation', 'outputevaluationdetails'))
-        if read_ini(CONFIG_FILE, 'plot', 'terminal') != '':
-            terminal_type = read_ini(CONFIG_FILE, 'plot', 'terminal').strip()
-        if read_ini(CONFIG_FILE, 'plot', 'wideplots') != '':
-            wide_plots = bool(int(read_ini(CONFIG_FILE, 'plot', 'wideplots')))
+        parser = input_type[algorithm_results_type]
 
-        debug_center.configure(CONFIG_FILE)
+    debug_center.show_in_console(None, "Info", "".join(["Algorithm name: ", algorithm_name]))
+    filtered_algorithm_name = ''.join([c for c in algorithm_name if c.isalnum()])
 
-        output_summary_stdout = 0
-        if args[1] == "/OutputStd":
-            output_summary_stdout = 1
-            args = args[:1] + args[2:]
+    results_data = read_results(algorithm_results_csv_file, parser, algorithm_name)
 
-        input_directory = None
-        input_file_part = None
-        if args[1] == "/Input":
-            input_directory, input_file_part = args[2], args[3]
-            args = args[:1] + args[4:]
+    def read_GT(ground_truth_csv_file, tracking=False):
+        ground_truth_data = read_ground_truth(ground_truth_csv_file)
+        # filter data without tracking GT
+        if tracking:
+            ground_truth_data = [(f, cell) for (f, cell) in ground_truth_data if cell.has_tracking_data()]
 
-        ground_truth_csv_file = args[1]
+        # use all frames with data or just frames where both gt and algo results
+        gt_set = set([item[0] for item in ground_truth_data])
+        res_set = set([item[0] for item in results_data[1]])
+        list_of_frames = sorted(gt_set | res_set if all_data_evaluated else gt_set & res_set)
 
-        evaluate_tracking = 1
-        if args[2] == "/SegOnly":
-            evaluate_tracking = 0
-            args = args[:2] + args[3:]
-
-        if args[2] in input_type:
-            ground_truth_parser = input_type[args[2]]
-            args = args[:2] + args[3:]
-
-        algorithm_results_csv_file = args[2]
-        algorithm_results_type = args[3]
-
-        if algorithm_results_type not in input_type:
+        if (list_of_frames == []):
             debug_center.show_in_console(None, "Error",
-                                         "ERROR: " + algorithm_results_type + " is not supported. There are supported types: " + str(
-                                             input_type))
+                                         "ERROR: No ground truth data! Intersection of ground truth and results is empty!")
             sys.exit()
-        else:
-            parser = input_type[algorithm_results_type]
+        data_per_frame = dict([(frame, ([g[1] for g in ground_truth_data if g[0] == frame],
+                                        [r[1] for r in results_data[1] if
+                                         r[0] == frame and not (tracking and not r[1].has_tracking_data())]))
+                               for frame in list_of_frames])
+        return ground_truth_data, list_of_frames, data_per_frame
 
-        algorithm_name = "Algorithm"
-        if (len(args) > 4):
-            algorithm_name = args[4]
-        debug_center.show_in_console(None, "Info", "".join(["Algorithm name: ", algorithm_name]))
-        filtered_algorithm_name = ''.join([c for c in algorithm_name if c.isalnum()])
+    ground_truth_data, list_of_frames, data_per_frame = read_GT(ground_truth_seg_csv_file)
 
-        ground_truth_seg_csv_file = ground_truth_csv_file
-        if len(args) == 6:
-            ground_truth_seg_csv_file = args[5]
+    debug_center.show_in_console(None, "Progress", "Evaluating segmentation...")
+    stats = []
+    segmentation_details = []
+    image_sizes = {}
 
-        results_data = read_results(algorithm_results_csv_file, parser, algorithm_name)
+    if output_evaluation_details and draw_evaluation_details:
+        overlord = draw_details.EvaluationDetails(SEGDETAILS_SUFFIX, input_file_part)
+        image_sizes = draw_details.get_images_sizes(overlord, input_directory)
 
-        def read_GT(ground_truth_csv_file, tracking=False):
-            ground_truth_data = read_ground_truth(ground_truth_csv_file)
-            # filter data without tracking GT
-            if tracking:
-                ground_truth_data = [(f, cell) for (f, cell) in ground_truth_data if cell.has_tracking_data()]
+    for frame in list_of_frames:
+        image_size = image_sizes.get(frame, (100000, 100000))
 
-            # use all frames with data or just frames where both gt and algo results
-            gt_set = set([item[0] for item in ground_truth_data])
-            res_set = set([item[0] for item in results_data[1]])
-            list_of_frames = sorted(gt_set | res_set if all_data_evaluated else gt_set & res_set)
+        (cr, cg, corr, fp, fn) = calculate_stats_segmentation(data_per_frame[frame][0], data_per_frame[frame][1],
+                                                              image_size)
+        segmentation_details += (corr, fp, fn)
+        stats.append((frame, (cr, cg, len(corr), len(fp), len(fn))))
 
-            if (list_of_frames == []):
-                debug_center.show_in_console(None, "Error",
-                                             "ERROR: No ground truth data! Intersection of ground truth and results is empty!")
-                sys.exit()
-            data_per_frame = dict([(frame, ([g[1] for g in ground_truth_data if g[0] == frame],
-                                            [r[1] for r in results_data[1] if
-                                             r[0] == frame and not (tracking and not r[1].has_tracking_data())]))
-                                   for frame in list_of_frames])
-            return ground_truth_data, list_of_frames, data_per_frame
+    (crs, cgs, corrs) = (0, 0, 0)
+    for (f, (cr, cg, corr, fp, fn)) in stats:
+        crs += cr
+        cgs += cg
+        corrs += corr
 
-        ground_truth_data, list_of_frames, data_per_frame = read_GT(ground_truth_seg_csv_file)
+    results_seg_summary = calculate_metrics_segmentation((crs, cgs, corrs, 0, 0))
+    debug_center.show_in_console(None, "Progress", "Done evaluating segmentation...")
 
-        debug_center.show_in_console(None, "Progress", "Evaluating segmentation...")
-        stats = []
-        segmentation_details = []
-        image_sizes = {}
+    summary_path = algorithm_results_csv_file + "." + filtered_algorithm_name + SUMMARY_SUFFIX
+    tmp_path = algorithm_results_csv_file + "." + filtered_algorithm_name + SEGPLOTDATA_SUFFIX
+    plot_path = algorithm_results_csv_file + "." + filtered_algorithm_name + SEGPLOT_SUFFIX
+    details_path = algorithm_results_csv_file + "." + filtered_algorithm_name + SEGDETAILS_SUFFIX
 
-        if output_evaluation_details and draw_evaluation_details:
-            overlord = draw_details.EvaluationDetails(SEGDETAILS_SUFFIX, input_file_part)
-            image_sizes = draw_details.get_images_sizes(overlord, input_directory)
+    debug_center.show_in_console(None, "Progress", "Ploting segmentation results...")
+    write_to_file_segmentation([(stat[0], calculate_metrics_segmentation(stat[1])) for stat in stats], tmp_path)
 
-        for frame in list_of_frames:
-            image_size = image_sizes.get(frame, (100000, 100000))
+    plot_file = package_path(SEGMENTATION_GNUPLOT_FILE)
+    with Plotter(terminal_type, plot_file, algorithm_name) as plotter:
+        plotter.setup_ploting_area(wide_plots, stats)
+        plotter.plot_it(tmp_path, plot_path)
 
-            (cr, cg, corr, fp, fn) = calculate_stats_segmentation(data_per_frame[frame][0], data_per_frame[frame][1],
-                                                                  image_size)
-            segmentation_details += (corr, fp, fn)
-            stats.append((frame, (cr, cg, len(corr), len(fp), len(fn))))
+    debug_center.show_in_console(None, "Progress", "Done ploting segmentation results...")
 
-        (crs, cgs, corrs) = (0, 0, 0)
-        for (f, (cr, cg, corr, fp, fn)) in stats:
-            crs += cr
-            cgs += cg
-            corrs += corr
+    if output_evaluation_details:
+        debug_center.show_in_console(None, "Progress", "Printing detailed segmentation results...")
+        write_to_file_printable(reduce_plus(segmentation_details), details_path)
+        debug_center.show_in_console(None, "Progress", "Done printing detailed segmentation results...")
+        if draw_evaluation_details:
+            if not (input_directory is None or input_file_part is None):
+                debug_center.show_in_console(None, "Progress", "Drawing detailed segmentation results...")
+                output_file_prefix = "SegDetails_"
+                overlord = draw_details.EvaluationDetails(details_path,
+                                                          required_substring=input_file_part,
+                                                          fill_markers=fill_markers,
+                                                          markersize=markersize)
+                output_drawings_directory = ensure_directory_in(details_path, SEG_DRAWING_FOLDER)
+                draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
+                debug_center.show_in_console(None, "Progress", "Done drawing detailed segmentation results...")
+            else:
+                debug_center.show_in_console(None, "Info",
+                                             "Skipping evaluation details drawing despite parameters as no input images were provided.")
 
-        results_seg_summary = calculate_metrics_segmentation((crs, cgs, corrs, 0, 0))
-        debug_center.show_in_console(None, "Progress", "Done evaluating segmentation...")
+    else:
+        debug_center.show_in_console(None, "Info", "Skipping evaluation details printing as desired by parameters.")
 
-        summary_path = algorithm_results_csv_file + "." + filtered_algorithm_name + SUMMARY_SUFFIX
-        tmp_path = algorithm_results_csv_file + "." + filtered_algorithm_name + SEGPLOTDATA_SUFFIX
-        plot_path = algorithm_results_csv_file + "." + filtered_algorithm_name + SEGPLOT_SUFFIX
-        details_path = algorithm_results_csv_file + "." + filtered_algorithm_name + SEGDETAILS_SUFFIX
+    if evaluate_tracking == 1:
+        ground_truth_data, list_of_frames, data_per_frame = read_GT(ground_truth_csv_file, True)
 
-        debug_center.show_in_console(None, "Progress", "Ploting segmentation results...")
-        write_to_file_segmentation([(stat[0], calculate_metrics_segmentation(stat[1])) for stat in stats], tmp_path)
+        debug_center.show_in_console(None, "Progress", "Evaluating tracking...")
+        stats_tracking = []
+        tracking_details = []
+        data = data_per_frame[list_of_frames[0]]
+        last_data = data
+        last_correspondence = find_correspondence(data[0], data[1])
+        # last_frame_id = list_of_frames[0]
+        # collect all evalustion details
+        for frame in list_of_frames[1:]:
+            data = data_per_frame[frame]
+            new_correspondence = find_correspondence(data[0], data[1])
 
-        plot_file = package_path(SEGMENTATION_GNUPLOT_FILE)
+            (tcr, tcg, tcorr, tfp, tfn) = calculate_stats_tracking(last_data, last_correspondence, data,
+                                                                   new_correspondence)
+            tracking_details += (tcorr, tfp, tfn)
+
+            stats_tracking.append((frame, (len(tcr), len(tcg), len(tcorr))))
+            last_correspondence = new_correspondence
+            last_data = data
+
+        (tcrs, tcgs, tcorrs) = (0, 0, 0)
+        for (f, (tcr, tcg, tcorr)) in stats_tracking:
+            tcrs += tcr
+            tcgs += tcg
+            tcorrs += tcorr
+
+        results_track_summary = calculate_precision_recall_F_metrics(tcrs, tcgs, tcorrs)
+        debug_center.show_in_console(None, "Progress", "Done evaluating tracking...")
+
+        tmp_path = algorithm_results_csv_file + "." + filtered_algorithm_name + TRACKPLOTDATA_SUFFIX
+        plot_path = algorithm_results_csv_file + "." + filtered_algorithm_name + TRACKPLOT_SUFFIX
+        details_path = algorithm_results_csv_file + "." + filtered_algorithm_name + TRACKDETAILS_SUFFIX
+
+        debug_center.show_in_console(None, "Progress", "Ploting tracking results...")
+        write_to_file_tracking(
+            [(stat[0], calculate_precision_recall_F_metrics(*stat[1])) for stat in stats_tracking], tmp_path)
+
+        plot_file = package_path(TRACKING_GNUPLOT_FILE)
         with Plotter(terminal_type, plot_file, algorithm_name) as plotter:
-            plotter.setup_ploting_area(wide_plots, stats)
+            plotter.setup_ploting_area(wide_plots, stats_tracking)
             plotter.plot_it(tmp_path, plot_path)
 
-        debug_center.show_in_console(None, "Progress", "Done ploting segmentation results...")
+        debug_center.show_in_console(None, "Progress", "Done ploting tracking results...")
 
         if output_evaluation_details:
-            debug_center.show_in_console(None, "Progress", "Printing detailed segmentation results...")
-            write_to_file_printable(reduce_plus(segmentation_details), details_path)
-            debug_center.show_in_console(None, "Progress", "Done printing detailed segmentation results...")
+            debug_center.show_in_console(None, "Progress", "Printing detailed tracking results...")
+            write_to_file_printable(reduce_plus(tracking_details), details_path)
+            debug_center.show_in_console(None, "Progress", "Done printing detailed tracking results...")
             if draw_evaluation_details:
                 if not (input_directory is None or input_file_part is None):
-                    debug_center.show_in_console(None, "Progress", "Drawing detailed segmentation results...")
-                    output_file_prefix = "SegDetails_"
+                    debug_center.show_in_console(None, "Progress", "Drawing detailed tracking results...")
+                    output_file_prefix = "TrackDetails_"
                     overlord = draw_details.EvaluationDetails(details_path,
                                                               required_substring=input_file_part,
                                                               fill_markers=fill_markers,
                                                               markersize=markersize)
-                    output_drawings_directory = ensure_directory_in(details_path, SEG_DRAWING_FOLDER)
+                    output_drawings_directory = ensure_directory_in(details_path, TRACK_DRAWING_FOLDER)
                     draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
-                    debug_center.show_in_console(None, "Progress", "Done drawing detailed segmentation results...")
+                    debug_center.show_in_console(None, "Progress", "Done drawing detailed tracking results...")
                 else:
                     debug_center.show_in_console(None, "Info",
                                                  "Skipping evaluation details drawing despite parameters as no input images were provided.")
-
         else:
-            debug_center.show_in_console(None, "Info", "Skipping evaluation details printing as desired by parameters.")
+            debug_center.show_in_console(None, "Info",
+                                         "Skipping evaluation details printing as desired by parameters.")
 
-        if evaluate_tracking == 1:
-            ground_truth_data, list_of_frames, data_per_frame = read_GT(ground_truth_csv_file, True)
+        # Calculate additional long-time tracking measure
+        if (len(data_per_frame) > 2):
+            debug_center.show_in_console(None, "Progress", "Evaluating long-time tracking...")
+            long_tracking_details = []
 
-            debug_center.show_in_console(None, "Progress", "Evaluating tracking...")
-            stats_tracking = []
-            tracking_details = []
-            data = data_per_frame[list_of_frames[0]]
-            last_data = data
-            last_correspondence = find_correspondence(data[0], data[1])
-            # last_frame_id = list_of_frames[0]
-            # collect all evalustion details
-            for frame in list_of_frames[1:]:
-                data = data_per_frame[frame]
-                new_correspondence = find_correspondence(data[0], data[1])
+            first_data = data_per_frame[list_of_frames[0]]
+            first_correspondence = find_correspondence(first_data[0], first_data[1])
 
-                (tcr, tcg, tcorr, tfp, tfn) = calculate_stats_tracking(last_data, last_correspondence, data,
-                                                                       new_correspondence)
-                tracking_details += (tcorr, tfp, tfn)
+            last_data = data_per_frame[list_of_frames[-1]]
+            last_correspondence = find_correspondence(last_data[0], last_data[1])
 
-                stats_tracking.append((frame, (len(tcr), len(tcg), len(tcorr))))
-                last_correspondence = new_correspondence
-                last_data = data
+            (lcr, lcg, lcorr, lfp, lfn) = calculate_stats_tracking(first_data, first_correspondence, last_data,
+                                                                   last_correspondence)
+            results_long_track_summary = calculate_precision_recall_F_metrics(len(lcr), len(lcg), len(lcorr))
+            long_tracking_details += (lcorr, lfp, lfn)
 
-            (tcrs, tcgs, tcorrs) = (0, 0, 0)
-            for (f, (tcr, tcg, tcorr)) in stats_tracking:
-                tcrs += tcr
-                tcgs += tcg
-                tcorrs += tcorr
-
-            results_track_summary = calculate_precision_recall_F_metrics(tcrs, tcgs, tcorrs)
-            debug_center.show_in_console(None, "Progress", "Done evaluating tracking...")
-
-            tmp_path = algorithm_results_csv_file + "." + filtered_algorithm_name + TRACKPLOTDATA_SUFFIX
-            plot_path = algorithm_results_csv_file + "." + filtered_algorithm_name + TRACKPLOT_SUFFIX
-            details_path = algorithm_results_csv_file + "." + filtered_algorithm_name + TRACKDETAILS_SUFFIX
-
-            debug_center.show_in_console(None, "Progress", "Ploting tracking results...")
-            write_to_file_tracking(
-                [(stat[0], calculate_precision_recall_F_metrics(*stat[1])) for stat in stats_tracking], tmp_path)
-
-            plot_file = package_path(TRACKING_GNUPLOT_FILE)
-            with Plotter(terminal_type, plot_file, algorithm_name) as plotter:
-                plotter.setup_ploting_area(wide_plots, stats_tracking)
-                plotter.plot_it(tmp_path, plot_path)
-
-            debug_center.show_in_console(None, "Progress", "Done ploting tracking results...")
-
+            details_path = algorithm_results_csv_file + "." + filtered_algorithm_name + LONGTRACKDETAILS_SUFFIX
             if output_evaluation_details:
-                debug_center.show_in_console(None, "Progress", "Printing detailed tracking results...")
-                write_to_file_printable(reduce_plus(tracking_details), details_path)
-                debug_center.show_in_console(None, "Progress", "Done printing detailed tracking results...")
+                debug_center.show_in_console(None, "Progress", "Printing detailed long-time tracking results...")
+                write_to_file_printable(reduce_plus(long_tracking_details), details_path)
+                debug_center.show_in_console(None, "Progress",
+                                             "Done printing detailed long-time tracking results...")
                 if draw_evaluation_details:
                     if not (input_directory is None or input_file_part is None):
-                        debug_center.show_in_console(None, "Progress", "Drawing detailed tracking results...")
-                        output_file_prefix = "TrackDetails_"
+                        debug_center.show_in_console(None, "Progress",
+                                                     "Drawing detailed long-time tracking results...")
+                        output_file_prefix = "LongTrackDetails_"
                         overlord = draw_details.EvaluationDetails(details_path,
                                                                   required_substring=input_file_part,
                                                                   fill_markers=fill_markers,
                                                                   markersize=markersize)
-                        output_drawings_directory = ensure_directory_in(details_path, TRACK_DRAWING_FOLDER)
+                        output_drawings_directory = ensure_directory_in(details_path, LONG_DRAWING_FOLDER)
                         draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
-                        debug_center.show_in_console(None, "Progress", "Done drawing detailed tracking results...")
+                        debug_center.show_in_console(None, "Progress",
+                                                     "Done drawing detailed long-time tracking results...")
                     else:
                         debug_center.show_in_console(None, "Info",
                                                      "Skipping evaluation details drawing despite parameters as no input images were provided.")
@@ -505,69 +522,34 @@ def run_script(args):
                 debug_center.show_in_console(None, "Info",
                                              "Skipping evaluation details printing as desired by parameters.")
 
-            # Calculate additional long-time tracking measure
-            if (len(data_per_frame) > 2):
-                debug_center.show_in_console(None, "Progress", "Evaluating long-time tracking...")
-                long_tracking_details = []
-
-                first_data = data_per_frame[list_of_frames[0]]
-                first_correspondence = find_correspondence(first_data[0], first_data[1])
-
-                last_data = data_per_frame[list_of_frames[-1]]
-                last_correspondence = find_correspondence(last_data[0], last_data[1])
-
-                (lcr, lcg, lcorr, lfp, lfn) = calculate_stats_tracking(first_data, first_correspondence, last_data,
-                                                                       last_correspondence)
-                results_long_track_summary = calculate_precision_recall_F_metrics(len(lcr), len(lcg), len(lcorr))
-                long_tracking_details += (lcorr, lfp, lfn)
-
-                details_path = algorithm_results_csv_file + "." + filtered_algorithm_name + LONGTRACKDETAILS_SUFFIX
-                if output_evaluation_details:
-                    debug_center.show_in_console(None, "Progress", "Printing detailed long-time tracking results...")
-                    write_to_file_printable(reduce_plus(long_tracking_details), details_path)
-                    debug_center.show_in_console(None, "Progress",
-                                                 "Done printing detailed long-time tracking results...")
-                    if draw_evaluation_details:
-                        if not (input_directory is None or input_file_part is None):
-                            debug_center.show_in_console(None, "Progress",
-                                                         "Drawing detailed long-time tracking results...")
-                            output_file_prefix = "LongTrackDetails_"
-                            overlord = draw_details.EvaluationDetails(details_path,
-                                                                      required_substring=input_file_part,
-                                                                      fill_markers=fill_markers,
-                                                                      markersize=markersize)
-                            output_drawings_directory = ensure_directory_in(details_path, LONG_DRAWING_FOLDER)
-                            draw_details.run(overlord, input_directory, output_drawings_directory, output_file_prefix)
-                            debug_center.show_in_console(None, "Progress",
-                                                         "Done drawing detailed long-time tracking results...")
-                        else:
-                            debug_center.show_in_console(None, "Info",
-                                                         "Skipping evaluation details drawing despite parameters as no input images were provided.")
-                else:
-                    debug_center.show_in_console(None, "Info",
-                                                 "Skipping evaluation details printing as desired by parameters.")
-
-                debug_center.show_in_console(None, "Progress", "Done evaluating long-time tracking...")
-            else:
-                debug_center.show_in_console(None, "Info",
-                                             "Skipping long-time tracking evaluation because there are too few frames.")
-                results_long_track_summary = []
+            debug_center.show_in_console(None, "Progress", "Done evaluating long-time tracking...")
         else:
-            debug_center.show_in_console(None, "Info", "Skipping tracking evaluation as desired by parameters.")
-            results_track_summary = []
+            debug_center.show_in_console(None, "Info",
+                                         "Skipping long-time tracking evaluation because there are too few frames.")
             results_long_track_summary = []
+    else:
+        debug_center.show_in_console(None, "Info", "Skipping tracking evaluation as desired by parameters.")
+        results_track_summary = []
+        results_long_track_summary = []
 
-        # save all the evaluation details if chosen to do so
-        # plot the results if /PLOT directory + name
-        write_summary(algorithm_name, results_seg_summary, results_track_summary, results_long_track_summary,
-                      summary_path)
-        debug_center.show_in_console(None, "Progress", "Done evaluating...")
+    # save all the evaluation details if chosen to do so
+    # plot the results if /PLOT directory + name
+    write_summary(algorithm_name, results_seg_summary, results_track_summary, results_long_track_summary,
+                  summary_path)
+    debug_center.show_in_console(None, "Progress", "Done evaluating...")
 
-        if output_summary_stdout:
-            debug_center.show_in_console(None, "Result",
-                                         format_summary(algorithm_name, results_seg_summary, results_track_summary,
-                                                        results_long_track_summary))
+    if output_summary_stdout:
+        debug_center.show_in_console(None, "Result",
+                                     format_summary(algorithm_name, results_seg_summary, results_track_summary,
+                                                    results_long_track_summary))
 
 
 if __name__ == '__main__':
-    run_script(sys.argv)
+    args = sys.argv
+    if any(["/" in a for a in args]) or args[1] == 'legacy':
+        if args[1] == 'legacy':
+            args = args[:1] + args[2:]
+        params = plot_comparison_legacy_parse(args)
+        run_script(**params)
+    else:
+        fire.Fire(run_script)
