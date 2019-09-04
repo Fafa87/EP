@@ -23,14 +23,14 @@ class CellOccurence:
 
     def get_id(self):
         """Return id of the cell in its frame."""
-        if (self.unique_id == -1):
+        if self.unique_id == -1:
             return self.cell_id
         else:
             return self.unique_id
 
     def get_triple(self):
         """Return (cell_id, posx, posy) or (unique_id, posx, posy)."""
-        return (self.get_id(), self.position[0], self.position[1])
+        return self.get_id(), self.position[0], self.position[1]
 
     def has_tracking_data(self):
         return self.unique_id != -1
@@ -167,7 +167,7 @@ class SegmentationResult(EvaluationDetail):
 
     def __init__(self, cell_gt=None, cell_algo=None):
         self.iou = None
-        if (not (cell_gt is None and cell_algo is None)):
+        if not (cell_gt is None and cell_algo is None):
             EvaluationDetail.__init__(self, (cell_gt or cell_algo).frame_number,
                                       self.calculate_result(cell_gt, cell_algo))
             self.cell_GT = cell_gt
@@ -235,7 +235,7 @@ class TrackingResult(EvaluationDetail):
     """
 
     def __init__(self, link_gt=None, link_algo=None):
-        if (not (link_gt is None and link_algo is None)):
+        if not (link_gt is None and link_algo is None):
             EvaluationDetail.__init__(self, (link_gt or link_algo).cell_B.frame_number,
                                       self.calculate_result(link_gt, link_algo))
             self.prev_frame = (link_gt or link_algo).cell_A.frame_number
@@ -259,7 +259,7 @@ class TrackingResult(EvaluationDetail):
         record = EvaluationDetail.csv_record(self) + [self.prev_frame]
 
         def print_link(record, link):
-            '@type link: TrackingLink'
+            """@type link: TrackingLink"""
             if link:
                 record = record + [link.cell_A.unique_id] + list(link.cell_A.position) + list(link.cell_B.position)
             else:

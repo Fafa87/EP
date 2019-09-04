@@ -9,9 +9,9 @@ class TestDebugCenter(unittest.TestCase):
     debug_center = DebugCenter()
 
     def test_check(self):
-        self.debug_center.chosen_categories = set(["seg"])
+        self.debug_center.chosen_categories = {"seg"}
         # get by category
-        self.assertTrue(self.debug_center.check_if_enabled(10, set(["seg"])))
+        self.assertTrue(self.debug_center.check_if_enabled(10, {"seg"}))
         # get by level
         self.assertTrue(self.debug_center.check_if_enabled(0, set()))
         # dont get
@@ -45,17 +45,17 @@ class TestDebugCenter(unittest.TestCase):
 
     def test_wrong_category(self):
         # Incorrect chosen_categories
-        self.debug_center.chosen_categories = set(["seg", "merged"])
+        self.debug_center.chosen_categories = {"seg", "merged"}
         with self.assertRaises(Exception):
-            self.debug_center.check_if_enabled(10, set(["seg"]))
+            self.debug_center.check_if_enabled(10, {"seg"})
 
         # Correct chosen_categories
-        self.debug_center.chosen_categories = set(["seg", "merge"])
-        self.debug_center.check_if_enabled(10, set(["seg"]))
+        self.debug_center.chosen_categories = {"seg", "merge"}
+        self.debug_center.check_if_enabled(10, {"seg"})
 
         # Incorrect categories to check
         with self.assertRaises(Exception):
-            self.debug_center.check_if_enabled(10, set(["sego"]))
+            self.debug_center.check_if_enabled(10, {"sego"})
 
     def setUp(self):
         if os.path.isfile(self.debug_center.log_file):
@@ -63,7 +63,7 @@ class TestDebugCenter(unittest.TestCase):
         self.debug_center = DebugCenter()
         self.debug_center.chosen_level = 1
         self.debug_center.category_levels = {"merge": 1, "track": 10}
-        self.debug_center.possible_categories = set(["seg", "track", "merge"])
+        self.debug_center.possible_categories = {"seg", "track", "merge"}
 
     def tearDown(self):
         if os.path.isfile(self.debug_center.log_file):

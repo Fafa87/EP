@@ -79,7 +79,10 @@ class ImageCellParser:
 class MaskImageParser(ImageCellParser):
     symbol = "MASK"
 
-    def __init__(self, facultative=[]):
+    def __init__(self, facultative=None):
+        ImageCellParser.__init__(self)
+        if facultative is None:
+            facultative = []
         self.facultative_values = facultative
 
     def is_facultative(self, v):

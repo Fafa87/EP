@@ -126,8 +126,8 @@ def ensure_directory_in(filepath, directory_name):
 
 
 def determine_output_filepath(filepath, output_path):
-    if os.path.isabs(filepath) == True:
-        if os.path.isabs(output_path) == True:
+    if os.path.isabs(filepath):
+        if os.path.isabs(output_path):
             # just put it in the given folder
             components = split_path(filepath)
             return os.path.join(output_path, os.path.join(*components[-2:]))
@@ -208,7 +208,7 @@ def read_from_csv(path):
     opened_file = open_csv(path, "r")
     lines = list(csv.reader(opened_file))
     opened_file.close()
-    return (lines[0], lines[1:])
+    return lines[0], lines[1:]
 
 
 def write_to_csv(headers, records, path):

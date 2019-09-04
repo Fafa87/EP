@@ -11,7 +11,7 @@ from ep.evalplatform.yeast_datatypes import *
 
 ### ======= CELLPARSER HIERARCHY ======= ###
 
-class CSVCellParser():
+class CSVCellParser:
     """Base class for standard parsers.
     Mapping must include "frame_nr","cell_nr","position_x","position_y".
     Can include: 
@@ -44,7 +44,7 @@ class CSVCellParser():
                 parsed = float(h)  # check if it is a number
             except Exception as e:
                 parsed = None
-            if parsed != None:
+            if parsed is not None:
                 return False
         return True  # all([h is not number for h in headers])
 
@@ -78,7 +78,7 @@ class CSVCellParser():
         [(frame_nr, cell_id, position_x, position_y)]
         """
         self.csv_dialect = None
-        if (self.is_csv_header(lines[0])):
+        if self.is_csv_header(lines[0]):
             self.configure(lines[0])
             lines = lines[1:]
         return [self.parse_line(line) for line in lines]
@@ -105,7 +105,7 @@ class CellProfilerParser(CSVCellParser):
     map_colour_name = {"frame_nr": 0, "cell_nr": 1, "cell_colour": 2, "position_x": 3, "position_y": 4}
 
     def configure(self, headers):
-        if ("Features_Colour" in headers or "Cell_colour" in headers):
+        if "Features_Colour" in headers or "Cell_colour" in headers:
             self.map_name = self.map_colour_name
         else:
             self.map_name = self.map_regular_name
@@ -119,7 +119,7 @@ class OldGroundTruthParser(CSVCellParser):
     map_colour_name = {"frame_nr": 0, "cell_nr": 1, "cell_colour": 2, "position_x": 3, "position_y": 4, "unique_id": 1}
 
     def configure(self, headers):
-        if ("Features_Colour" in headers or "Cell_colour" in headers):
+        if "Features_Colour" in headers or "Cell_colour" in headers:
             self.map_name = self.map_colour_name
         else:
             self.map_name = self.map_regular_name
@@ -227,7 +227,7 @@ class DefaultPlatformParser(CSVCellParser):
         [(frame_nr, cell_id, position_x, position_y)]
         """
         self.csv_dialect = None
-        if (self.is_csv_header(lines[0])):
+        if self.is_csv_header(lines[0]):
             self.configure(lines[0])
             lines = lines[1:]
         return [self.parse_line(line) for line in lines]
@@ -250,10 +250,10 @@ class DefaultPlatformParser(CSVCellParser):
         has_tracking_data = len(cells) > 0 and cells[0][1].has_tracking_data()
 
         ordered_headers = ["Frame_number", "Cell_number"]
-        if (output_colors):
+        if output_colors:
             ordered_headers += ["Cell_colour"]
         ordered_headers += ["Position_X", "Position_Y"]
-        if (has_tracking_data):
+        if has_tracking_data:
             ordered_headers += ["Unique_cell_number"]
 
         csv = [CSVCellParser.csv_line(self, ordered_headers)]
@@ -262,12 +262,12 @@ class DefaultPlatformParser(CSVCellParser):
         return "\n".join(csv)
 
     def output_cell(self, cell, output_colors=False):
-        '@type cell: CellOccurence'
+        """@type cell: CellOccurence"""
         data = [cell.frame_number, cell.cell_id]
-        if (output_colors):
+        if output_colors:
             data += [cell.colour]
         data += [cell.position[0], cell.position[1]]
-        if (cell.has_tracking_data()):
+        if cell.has_tracking_data():
             data += [cell.unique_id]
         return CSVCellParser.csv_line(self, data)
 
@@ -296,7 +296,7 @@ class TrackingLinkParser(CSVCellParser):
         (f, cid, x, y, lastid) = (self.get_original_column("frame_nr"), self.get_original_column("cell_nr"),
                                   self.get_original_column("position_x"), self.get_original_column("position_y"),
                                   self.get_original_column("last_frame_nr"))
-        return (int(f), int(cid), float(x), float(y), int(lastid))
+        return int(f), int(cid), float(x), float(y), int(lastid)
 
     def parse(self, lines):
         """

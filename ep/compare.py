@@ -29,7 +29,7 @@ def find_all_created_files_paths(folder):
     return [os.path.join(folder, f) for f in files]
 
 
-if (len(sys.argv) < 3):
+if len(sys.argv) < 3:
     print("".join(["Wrong number (" + str(len(sys.argv) - 1) + ") of arguments 1+2k required)."]))
     print("".join(sys.argv[1:]))
     print("".join(["Program usage: compare.py <results_folder> [<algorithm_subpath>]2+"]))

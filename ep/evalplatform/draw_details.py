@@ -165,7 +165,7 @@ class EvaluationDetails(DrawingOverlordABC):
         return [(d.frame, d) for d in data]
 
     def create_paint_request(self, frame, image_file, data_sample):
-        '@type data_sample: EvaluationDetail'
+        """@type data_sample: EvaluationDetail"""
         if data_sample.result != EvaluationResult.CORRECT or self.draw_correct:
             if isinstance(data_sample, SegmentationResult):
                 return [SegmentationDetail(image_file, data_sample, markerfill=self.fill_markers,
@@ -177,15 +177,15 @@ class EvaluationDetails(DrawingOverlordABC):
 
 # ============= EXTERNAL CODE: http://robotics.usc.edu/~ampereir/wordpress/?p=626 ============= #
 def SaveFigureAsImage(fileName, fig=None, **kwargs):
-    ''' Save a Matplotlib figure as an image without borders or frames.
+    """ Save a Matplotlib figure as an image without borders or frames.
        Args:
             fileName (str): String that ends in .png etc.
 
             fig (Matplotlib figure instance): figure you want to save as the image
         Keyword Args:
-            orig_size (tuple): width, height of the original image used to maintain 
+            orig_size (tuple): width, height of the original image used to maintain
             aspect ratio.
-    '''
+    """
     fig_size = fig.get_size_inches()
     w, h = fig_size[0], fig_size[1]
     fig.patch.set_alpha(0)
@@ -197,12 +197,12 @@ def SaveFigureAsImage(fileName, fig=None, **kwargs):
         # fig.set_dpi((w2/w)*fig.get_dpi())
     a = fig.gca()
     a.set_frame_on(False)
-    a.set_xticks([]);
+    a.set_xticks([])
     a.set_yticks([])
     plt.axis('off')
-    plt.xlim(0, w);
+    plt.xlim(0, w)
     plt.ylim(h, 0)
-    fig.savefig(fileName, transparent=True, bbox_inches='tight', \
+    fig.savefig(fileName, transparent=True, bbox_inches='tight',
                 pad_inches=0)
 
 
@@ -226,7 +226,7 @@ def get_trailing_number(filepath):
 def get_images_sizes(overlord, directory_images):
     def get_image_size_xy(filepath):
         shape_yx = misc.imread(filepath).shape
-        return (shape_yx[1], shape_yx[0])
+        return shape_yx[1], shape_yx[0]
 
     def get_old_path_file(filename):
         return os.path.join(directory_images, filename)

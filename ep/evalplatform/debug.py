@@ -22,7 +22,7 @@ class DebugCenter(object):
     def check_if_enabled(self, level, categories):
         if type(categories) is str:
             category = categories
-            categories = set([category])
+            categories = {category}
             if level is None and category in self.category_levels:
                 # take level of category
                 level = self.category_levels[category]
@@ -34,13 +34,13 @@ class DebugCenter(object):
                     level <= self.chosen_level or any([cat in self.chosen_categories for cat in categories]))
 
     def show_in_console(self, level, categories, text):
-        if (self.check_if_enabled(level, categories)):
+        if self.check_if_enabled(level, categories):
             print (text)
             return True
         return False
 
     def log_in_file(self, level, text):
-        if (self.log_to_file and self.check_if_enabled(level, set())):
+        if self.log_to_file and self.check_if_enabled(level, set()):
             with open(self.log_file, 'a') as f:
                 f.write(text + '\n')
             return True

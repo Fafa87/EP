@@ -98,7 +98,7 @@ def check_existance(files, filter, get_path=None):
     for file in files:
         get_path = get_path or (lambda x: x)
         file_path = get_path(file)
-        if (os.path.isfile(file_path) == 0):
+        if os.path.isfile(file_path) == 0:
             debug_center.show_in_console(None, "Warning", "".join(["WARNING: ", "File don't exist: " + file_path]))
         else:
             existing_files.append(file)
@@ -119,12 +119,12 @@ def create_additional_plots(title, name_data_paths, set_number, output_name):
     @param set_number: first element is 0
     """
     try:
-        if name_data_paths == []:
+        if not name_data_paths:
             return -1
 
         if len(name_data_paths) > 50:
             debug_center.show_in_console(None, "Warning",
-                                         ("WARNING: Too many plots given, merged plot would not make any sense."))
+                                         "WARNING: Too many plots given, merged plot would not make any sense.")
             return -1
 
         # Extract data from all the algorithms.
@@ -169,24 +169,24 @@ def merge_txt(file_paths, output):
 
 
 def merge_images(images_paths, results_folder, output):
-    if (len(images_paths) == 0):
+    if len(images_paths) == 0:
         debug_center.show_in_console(None, "Error", "".join(["ERROR: ", "No plots given"]))
         return -1
-    elif (len(images_paths) == 1):
+    elif len(images_paths) == 1:
         debug_center.show_in_console(None, "Error",
                                      "".join(["ERROR: ", "Too few plots (2 required): ", str(len(images_paths))]))
         return -1
-    elif (len(images_paths) == 3):
+    elif len(images_paths) == 3:
         debug_center.show_in_console(None, "Warning", "".join(
             ["WARNING: ", "Too many plots given (2 expected): ", str(len(images_paths))]))
         debug_center.show_in_console(None, "Warning", "".join(["WARNING: ", "Only first 2 are considered."]))
         images_paths = images_paths[:2]
-    elif (len(images_paths) == 5):
+    elif len(images_paths) == 5:
         debug_center.show_in_console(None, "Warning", "".join(
             ["WARNING: ", "Too many plots given (4 expected): ", str(len(images_paths))]))
         debug_center.show_in_console(None, "Warning", "".join(["WARNING: ", "Only first 4 are considered."]))
         images_paths = images_paths[:4]
-    elif (len(images_paths) > 6):
+    elif len(images_paths) > 6:
         debug_center.show_in_console(None, "Warning", "".join(
             ["WARNING: ", "Too many plots given (6 expected): ", str(len(images_paths))]))
         debug_center.show_in_console(None, "Warning", "".join(["WARNING: ", "Only first 6 are considered."]))
@@ -214,7 +214,7 @@ def merge_images(images_paths, results_folder, output):
 def run_script(args):
     global terminal_type, wide_plots
 
-    if (len(args) % 2 == 0 and len(args) < 4):
+    if len(args) % 2 == 0 and len(args) < 4:
         print("".join(["Wrong number (" + str(len(args) - 1) + ") of arguments (1+2(1+k) required)."]))
         print(args)
         print("".join(["Program usage: gather_results.py <results_folder> [<algorithm_subpath> <algorithm_name>]x+"]))
@@ -246,7 +246,7 @@ def run_script(args):
             result_paths = [os.path.join(results_folder, algo_results, algo_name + sufix) for sufix in images_sufixes]
 
             # we require summary file for algorithm name
-            if check_existance([summary_path], 1) != []:
+            if check_existance([summary_path], 1):
                 algorithms_surname.append(read_algorithm_name(summary_path))
                 summaries_paths.append(summary_path)
                 segmentation_data_paths.append(segmentation_data_path)

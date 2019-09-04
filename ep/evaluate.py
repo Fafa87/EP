@@ -118,17 +118,17 @@ def merge_files_into_one(times, folder, files):
 
 
 def parse_data(args, parent_folder):
-    if (args[0] == '/S'):
+    if args[0] == '/S':
         # Single file!
         folder = os.path.join(parent_folder, args[1])
         seg_track_name = args[2]
-        return (args[3:], (folder, seg_track_name))
+        return args[3:], (folder, seg_track_name)
     else:
         # Separate!
         folder = os.path.join(parent_folder, args[0])
         seg_name = args[1]
         track_name = args[2]
-        return (args[3:], (folder, seg_name, track_name))
+        return args[3:], (folder, seg_name, track_name)
 
 
 if __name__ == '__main__':

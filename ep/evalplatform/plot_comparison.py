@@ -35,15 +35,15 @@ wide_plots = 0
 
 
 def filter_border(celllist, image_size=(10000, 10000)):
-    if (celllist == []):
+    if celllist == []:
         return []
-    if (isinstance(celllist[0], CellOccurence)):
+    if isinstance(celllist[0], CellOccurence):
         def close_to_border(cell, limits):
             return not (ignored_frame_size <= cell.position[0] <= (limits[0] - ignored_frame_size) and
                         ignored_frame_size <= cell.position[1] <= (limits[1] - ignored_frame_size))
 
         return [cell for cell in celllist if not cell.obligatory() or close_to_border(cell, image_size)]
-    elif (len(celllist[0]) == 2):
+    elif len(celllist[0]) == 2:
         return [(cell_A, cell_B) for (cell_A, cell_B) in celllist if not cell_A.obligatory() or not cell_B.obligatory()]
     else:
         print (celllist)
@@ -77,7 +77,7 @@ def read_results(path, parser, name):
     cells = parser.load_from_file(path)
     make_all_cells_important(cells)  # cells cannot use colour temporary
     debug_center.show_in_console(None, "Progress", "".join(["Done reading ", name, " result data..."]))
-    return (name, cells)
+    return name, cells
 
 
 def write_to_file_tracking(stats, path):
@@ -102,7 +102,7 @@ def write_to_file_segmentation(stats, path):
 
 
 def write_to_file_printable(details, path):
-    if details != []:
+    if details:
         headers = details[0].csv_headers()
         records = [d.csv_record() for d in details]
         write_to_csv(headers, records, path)
@@ -267,7 +267,7 @@ def calculate_stats_tracking(params_last, last_mapping, params_new, new_mapping)
     false_positives = [TrackingResult(None, res) for res in found_links if
                        correct_links == [] or res not in list(zip(*correct_links))[0]]
 
-    return (found_links, real_links, correct_results, false_positives, false_negatives)  # evaluation_details
+    return found_links, real_links, correct_results, false_positives, false_negatives  # evaluation_details
 
 
 def load_general_ini(path):
@@ -336,7 +336,7 @@ def run(ground_truth_csv_file,
         res_set = set([item[0] for item in results_data[1]])
         list_of_frames = sorted(gt_set | res_set if all_data_evaluated else gt_set & res_set)
 
-        if (list_of_frames == []):
+        if list_of_frames == []:
             debug_center.show_in_console(None, "Error",
                                          "ERROR: No ground truth data! Intersection of ground truth and results is empty!")
             sys.exit()
