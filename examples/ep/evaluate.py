@@ -17,7 +17,7 @@ delete_tmp = 0  # are all temporary files to be removed at the end of the evalua
 def find_all_files(folder, filename):
     files = [f for f in os.listdir(folder) if
              os.path.isfile(os.path.join(folder, f)) and filename in f and (TMP_SUFFIX not in f) and (
-                         ".track_eval" not in f and ".seg_eval" not in f and ".eval." not in f and ".eval_summary." not in f)
+                     ".track_eval" not in f and ".seg_eval" not in f and ".eval." not in f and ".eval_summary." not in f)
              and f != filename + ".merged"
              ]
     return files
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     gt = []
     gt_parser = DEFAULT_PARSER
 
-    if (arg_list[0] == '/Parser'):
+    if arg_list[0] == '/Parser':
         gt_parser = arg_list[1]
         arg_list = arg_list[2:]
 
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     algo_name = arg_list[0]
     arg_list = arg_list[1:]
 
-    if (arg_list[0] == '/Parser'):
+    if arg_list[0] == '/Parser':
         algo_parser = arg_list[1]
         arg_list = arg_list[2:]
 
@@ -161,17 +161,17 @@ if __name__ == '__main__':
     many_files_algo = len(find_all_files(algo[0], algo[1])) > 1
 
     output_to_stdout = []
-    if (arg_list != [] and arg_list[0] == '/OutputStd'):
+    if arg_list != [] and arg_list[0] == '/OutputStd':
         output_to_stdout = ['/OutputStd']
         arg_list = arg_list[1:]
 
     automatic_details_drawing_params = []
-    if (arg_list != [] and arg_list[0] == '/Input'):
+    if arg_list != [] and arg_list[0] == '/Input':
         automatic_details_drawing_params = ['/Input', os.path.join(testset_folder, arg_list[1]), arg_list[2]]
         arg_list = arg_list[3:]
 
     # Validate multifile
-    if (many_files_gt ^ many_files_algo):
+    if many_files_gt ^ many_files_algo:
         debug_center.show_in_console(None, "Warning",
                                      "WARNING: Either both algorithm results and ground truth should use many files or none of them. Make sure that frames are correctly matched (GT-Results).")
         # sys.exit(1) we can live without it
@@ -179,12 +179,12 @@ if __name__ == '__main__':
     gt_files = []
     algo_files = []
     evaluate_tracking = not (len(algo) > 2 and algo[2] == "NONE" or len(gt) > 2 and gt[2] == "NONE")
-    if evaluate_tracking == False:
+    if not evaluate_tracking:
         algo = algo[0:2]
         gt = gt[0:2]
 
     # If we have many files then find snapshot times and merge files
-    if (many_files_gt or many_files_algo):
+    if many_files_gt or many_files_algo:
         debug_center.show_in_console(None, "Tech", "Many files option detected. Merging files...")
 
         # Calculate snapshot times
@@ -215,14 +215,14 @@ if __name__ == '__main__':
                 algo_files += [merge_files_into_one(all_times, algo[0], find_all_files(algo[0], algo[2]))]
         debug_center.show_in_console(None, "Tech", "...done merging files")
 
-    if (many_files_gt == 0):
+    if many_files_gt == 0:
         # add original files
         debug_center.show_in_console(None, "Info", "Ground truth uses single files option...")
         gt_files = find_all_files(gt[0], gt[1])
         if len(gt) > 2:
             gt_files += find_all_files(gt[0], gt[2])
 
-    if (many_files_algo == 0):
+    if many_files_algo == 0:
         # add original files
         debug_center.show_in_console(None, "Info", "Algorithm results uses single files option...")
         algo_files = find_all_files(algo[0], algo[1])
@@ -230,7 +230,7 @@ if __name__ == '__main__':
             algo_files += find_all_files(algo[0], algo[2])
 
     # Merge two files into one
-    if (len(gt_files) > 1):
+    if len(gt_files) > 1:
         debug_center.show_in_console(None, "Tech", "Two files for GT. Merging...")
         gt_input = merge_seg_track_files(gt[0], gt_files)
         debug_center.show_in_console(None, "Tech", "...done merging")
@@ -238,7 +238,7 @@ if __name__ == '__main__':
         # kopiuj plik do tempa
         gt_input = gt_files[0]
 
-    if (len(algo_files) > 1):
+    if len(algo_files) > 1:
         debug_center.show_in_console(None, "Tech", "Two results files. Merging...")
         algo_input = merge_seg_track_files(algo[0], algo_files)
         debug_center.show_in_console(None, "Tech", "...done merging")
@@ -248,19 +248,17 @@ if __name__ == '__main__':
     else:
         raise Exception("No algorithm results found.")
 
-    # Run evaluation 
-    evaluate_tracking_param = ''
-    if evaluate_tracking == 0:
-        evaluate_tracking_param = "/SegOnly"
+    # Run evaluation
 
     gt_path = os.path.join(gt[0], gt_input)
     algo_path = os.path.join(algo[0], algo_input)
 
-    parameters = output_to_stdout + automatic_details_drawing_params + [gt_path, evaluate_tracking_param, gt_parser,
-                                                                        algo_path, algo_parser, algo_name]
-
-    evaluate.run_script(["plot_comparison.py"] + [param for param in parameters if param != ''])
-    # os.system("python plot_comparison.py " + " ".join(["\""+param+"\"" for param in parameters if param != '']))
+    evaluate.run(gt_path, algo_path, algo_parser, algo_name,
+                 ground_truth_special_parser=gt_parser,
+                 output_summary_stdout=output_to_stdout != [],
+                 evaluate_tracking=evaluate_tracking,
+                 input_directory=automatic_details_drawing_params[1] if automatic_details_drawing_params else None,
+                 input_file_part=automatic_details_drawing_params[2] if automatic_details_drawing_params else None)
 
     debug_center.show_in_console(None, "Progress", "Moving files to output...")
 
@@ -279,7 +277,7 @@ if __name__ == '__main__':
     # move evaluation details drawings
     for directory in created_details:
         new_path = determine_output_filepath(directory, OUTPUT_FOLDER)
-        if (os.path.isdir(new_path)):
+        if os.path.isdir(new_path):
             shutil.rmtree(new_path, onerror=remove_readonly)
         os.renames(directory, new_path)
 

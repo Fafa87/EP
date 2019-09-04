@@ -291,15 +291,15 @@ def load_general_ini(path):
         markersize = int(read_ini(path, 'details', 'markersize'))
 
 
-def run_script(ground_truth_csv_file,
-               algorithm_results_csv_file, algorithm_results_type, algorithm_name="Algorithm",
-               ground_truth_seg_csv_file=None, ground_truth_special_parser=None,
-               input_directory=None, input_file_part="",
-               evaluate_tracking=True, output_summary_stdout=False):
+def run(ground_truth_csv_file,
+        algorithm_results_csv_file, algorithm_results_type, algorithm_name="Algorithm",
+        ground_truth_seg_csv_file=None, ground_truth_special_parser=None,
+        input_directory=None, input_file_part="",
+        evaluate_tracking=True, output_summary_stdout=False):
     global ground_truth_parser, output_evaluation_details, wide_plots
 
     if ground_truth_special_parser is not None:
-        ground_truth_parser = input_type[ground_truth_parser]
+        ground_truth_parser = input_type[ground_truth_special_parser]
     ground_truth_seg_csv_file = ground_truth_seg_csv_file or ground_truth_csv_file
 
     load_general_ini(CONFIG_FILE)
@@ -481,7 +481,7 @@ def run_script(ground_truth_csv_file,
                                          "Skipping evaluation details printing as desired by parameters.")
 
         # Calculate additional long-time tracking measure
-        if (len(data_per_frame) > 2):
+        if len(data_per_frame) > 2:
             debug_center.show_in_console(None, "Progress", "Evaluating long-time tracking...")
             long_tracking_details = []
 
@@ -550,6 +550,6 @@ if __name__ == '__main__':
         if args[1] == 'legacy':
             args = args[:1] + args[2:]
         params = plot_comparison_legacy_parse(args)
-        run_script(**params)
+        run(**params)
     else:
-        fire.Fire(run_script)
+        fire.Fire(run)

@@ -9,16 +9,16 @@ from ep.evalplatform.compatibility import plot_comparison_legacy_parse
 
 class TestLegacyPlotComparisonCompatibility(unittest.TestCase):
     def assert_parse_equal(self, args, args_new=None):
-        org_run_script = ep.evalplatform.plot_comparison.run_script
+        org_run_script = ep.evalplatform.plot_comparison.run
         args_new = args_new or args
-        with patch('ep.evalplatform.plot_comparison.run_script', autospec=True) as run_script_mock:
+        with patch('ep.evalplatform.plot_comparison.run', autospec=True) as run_script_mock:
             # run legacy parsing
             params = plot_comparison_legacy_parse(args, ep.evalplatform.plot_comparison.input_type)
-            ep.evalplatform.plot_comparison.run_script(**params)
+            ep.evalplatform.plot_comparison.run(**params)
             legacy_params = run_script_mock.call_args.kwargs
 
             # run brand new Fire
-            fire.Fire(ep.evalplatform.plot_comparison.run_script, args_new[1:])
+            fire.Fire(ep.evalplatform.plot_comparison.run, args_new[1:])
             new_params_args = dict(zip(org_run_script.func_code.co_varnames, run_script_mock.call_args.args))
             new_params = run_script_mock.call_args.kwargs
             new_params.update(new_params_args)
