@@ -292,12 +292,14 @@ def load_general_ini(path):
 
 
 def run(ground_truth_csv_file,
-        algorithm_results_csv_file, algorithm_results_type, algorithm_name="Algorithm",
+        algorithm_results_csv_file, algorithm_results_type, algorithm_name=None,
         ground_truth_seg_csv_file=None, ground_truth_special_parser=None,
-        input_directory=None, input_file_part="",
+        input_directory=None, input_file_part=None,
         evaluate_tracking=True, output_summary_stdout=False):
     global ground_truth_parser, output_evaluation_details, wide_plots
 
+    input_file_part = input_file_part or ""
+    algorithm_name = algorithm_name or "Algorithm"
     if ground_truth_special_parser is not None:
         ground_truth_parser = input_type[ground_truth_special_parser]
     ground_truth_seg_csv_file = ground_truth_seg_csv_file or ground_truth_csv_file

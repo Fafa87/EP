@@ -23,6 +23,8 @@ def plot_comparison_legacy_parse(args, input_type):
         if args[1] == "/OutputStd":
             parsed_args.output_summary_stdout = True
             args = args[:1] + args[2:]
+        else:
+            parsed_args.output_summary_stdout = False
 
         if args[1] == "/Input":
             parsed_args.input_directory, parsed_args.input_file_part = args[2], args[3]
@@ -31,8 +33,10 @@ def plot_comparison_legacy_parse(args, input_type):
         parsed_args.ground_truth_csv_file = args[1]
 
         if args[2] == "/SegOnly":
-            parsed_args.evaluate_tracking = 0
+            parsed_args.evaluate_tracking = False
             args = args[:2] + args[3:]
+        else:
+            parsed_args.evaluate_tracking = True
 
         if args[2] in input_type:
             parsed_args.ground_truth_special_parser = args[2]

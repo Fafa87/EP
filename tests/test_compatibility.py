@@ -8,6 +8,19 @@ from ep.evalplatform.compatibility import plot_comparison_legacy_parse
 
 
 class TestLegacyPlotComparisonCompatibility(unittest.TestCase):
+    @staticmethod
+    def get_fun_vars(func):
+        try:
+            return func.func_code.co_varnames
+        except AttributeError:
+            return func.__code__.co_varnames
+
+    def assert_ignore_none(self, left_d, right_d):
+        for key in set(left_d.keys()) | set(right_d.keys()):
+            left_v = left_d.get(key, None)
+            right_v = right_d.get(key, None)
+            self.assertEqual(left_v, right_v, msg="For key: " + key)
+
     def assert_parse_equal(self, args, args_new=None):
         org_run_script = ep.evalplatform.plot_comparison.run
         args_new = args_new or args
@@ -19,12 +32,14 @@ class TestLegacyPlotComparisonCompatibility(unittest.TestCase):
 
             # run brand new Fire
             fire.Fire(ep.evalplatform.plot_comparison.run, args_new[1:])
-            new_params_args = dict(zip(org_run_script.func_code.co_varnames, run_script_mock.call_args.args))
+            new_params_args = dict(zip(TestLegacyPlotComparisonCompatibility.get_fun_vars(org_run_script),
+                                       run_script_mock.call_args.args))
             new_params = run_script_mock.call_args.kwargs
             new_params.update(new_params_args)
 
             # compare the parsed parameters
-            self.assertEqual(legacy_params, new_params)
+            # self.assertEqual(legacy_params, new_params)
+            self.assert_ignore_none(legacy_params, new_params)
 
     def test_legacy_parser(self):
         args = ['file.py', r'Results\Ground Truth\Ground Truth_GroundTruthCenters.csv',
