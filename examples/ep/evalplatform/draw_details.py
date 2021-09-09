@@ -225,7 +225,7 @@ def get_trailing_number(filepath):
 
 def get_images_sizes(overlord, directory_images):
     def get_image_size_xy(filepath):
-        shape_yx = misc.imread(filepath).shape
+        shape_yx = imageio.imread(filepath).shape
         return (shape_yx[1], shape_yx[0])
 
     def get_old_path_file(filename):
